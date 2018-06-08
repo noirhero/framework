@@ -35,14 +35,17 @@ function Actor(res_mng, pipeline) {
   };
 
   var Keydown_ = function(event) {
-    var key_code = event.key;
+    var key_code = event.code;
     if(-1 !== key_code.indexOf('Arrow')) {
       instance_.SetState('walk');
+    }
+    else if(-1 !== key_code.indexOf('Space')) {
+      instance_.SetState('attack');
     }
   };
 
   var Keyup_ = function(event) {
-    var key_code = event.key;
+    var key_code = event.code;
     if(-1 !== key_code.indexOf('Arrow')) {
       instance_.SetState('idle');
     }
