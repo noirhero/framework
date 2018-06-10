@@ -15,6 +15,10 @@ function Pipeline(gl) {
     return true;
   };
 
+  this.OnContextLost = function() {
+    // empty
+  };
+
   this.UpdateViewProjection = function(camera, projection) {
     mat4.multiply(transform_vp_, projection.GetTransform(), camera.GetTransform());
   };
@@ -38,17 +42,16 @@ function Pipeline(gl) {
       }
 
       instance.FillVertices(vertices_, quad_position_);
-
-      gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
-      gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
-      gl.vertexAttribPointer(a_local_pos_, 3, gl.FLOAT, false, 20, 0);
-      gl.enableVertexAttribArray(a_local_pos_);
-      gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, 20, 12);
-      gl.enableVertexAttribArray(a_texcoord_pos_);
-
-      gl.uniformMatrix4fv(u_transform_w_, false, instance.GetWorldTransform());
-      gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_SHORT, 0);
     }
+
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+    gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, 20, 0);
+    gl.enableVertexAttribArray(a_world_pos_);
+    gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, 20, 12);
+    gl.enableVertexAttribArray(a_texcoord_pos_);
+
+    gl.drawElements(gl.TRIANGLES, num_index_ * index_stride_, gl.UNSIGNED_SHORT, 0);
   };
 
   this.AddInstance = function(instance) {
@@ -81,16 +84,15 @@ function Pipeline(gl) {
 
   function CreateShadersAndLinkProgram_() {
     vs_ = CreateShader_(gl.VERTEX_SHADER, [
-      'attribute vec3 aLocalPos;',
+      'attribute vec3 aWorldPos;',
       'attribute vec2 aTextureCoord;',
 
-      'uniform mat4 uWorldTransform;',
       'uniform mat4 uViewProjectionTransform;',
 
       'varying vec2 vTextureCoord;',
 
       'void main() {',
-      ' gl_Position = uViewProjectionTransform * /*uWorldTransform */ vec4(aLocalPos, 1.0);',
+      ' gl_Position = uViewProjectionTransform * vec4(aWorldPos, 1.0);',
       ' vTextureCoord = aTextureCoord;',
       '}',
     ].join('\n'));
@@ -125,9 +127,8 @@ function Pipeline(gl) {
       return false;
     }
 
-    a_local_pos_ = gl.getAttribLocation(program_, 'aLocalPos');
+    a_world_pos_ = gl.getAttribLocation(program_, 'aWorldPos');
     a_texcoord_pos_ = gl.getAttribLocation(program_, 'aTextureCoord');
-    u_transform_w_ = gl.getUniformLocation(program_, 'uWorldTransform');
     u_transform_vp_ = gl.getUniformLocation(program_, 'uViewProjectionTransform');
     u_albedo_ = gl.getUniformLocation(program_, 'uAlbedo');
 
@@ -137,6 +138,8 @@ function Pipeline(gl) {
   function CreateVertexBuffer_() {
     for(var i = 0; i < num_index_; ++i) {
       var offset = i * vertex_stride_;
+
+      // x, y, z, tx, ty
       vertices_[offset] = -0.5;
       vertices_[offset + 1] = 0.5;
       vertices_[offset + 2] = 0.0;
@@ -193,9 +196,8 @@ function Pipeline(gl) {
   var program_ = null;
   var vs_ = null;
   var fs_ = null;
-  var a_local_pos_ = null;
+  var a_world_pos_ = null;
   var a_texcoord_pos_ = null;
-  var u_transform_w_ = null;
   var u_transform_vp_ = null;
   var u_albedo_ = null;
 

@@ -6,23 +6,8 @@ function Context() {
   */
   this.Initialize = function() {
     UpdateFrustum_();
-
-    canvas_ = document.getElementById('main_canvas');
-    canvas_.width = frustum_.width;
-    canvas_.height = frustum_.height;
-    canvas_ = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas_);
-    canvas_.addEventListener('webglcontextlost', ContextLost_, false);
-    canvas_.addEventListener('webglcontextrestored', ContextRestored_, false);
-
-    gl_ = canvas_.getContext('webgl') || canvas_.getContext('experimental-webgl');
-    if (null === gl_) {
-      return false;
-    }
-    gl_ = WebGLDebugUtils.makeDebugContext(gl_);
-
-    gl_.enable(gl_.DEPTH_TEST);
-    gl_.disable(gl_.CULL_FACE);
-    gl_.frontFace(gl_.CW);
+    InitializeCanvas_();
+    InitializeWebGL_();
 
     // debug simulation
     window.addEventListener('mousedown', function() {
@@ -30,10 +15,6 @@ function Context() {
     });
 
     return true;
-  };
-
-  this.SetTickFunction = function(tick_fn) {
-    tick_fn_ = tick_fn;
   };
 
   this.Run = function() {
@@ -71,6 +52,10 @@ function Context() {
     });
   };
 
+  this.SetTickFunction = function(tick_fn) {
+    tick_fn_ = tick_fn;
+  };
+
   this.GetFrustum = function() {
     return frustum_;
   };
@@ -80,6 +65,27 @@ function Context() {
   /*
   private functions
   */
+  function InitializeCanvas_() {
+    canvas_ = document.getElementById('main_canvas');
+    canvas_.width = frustum_.width;
+    canvas_.height = frustum_.height;
+    canvas_ = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas_);
+    canvas_.addEventListener('webglcontextlost', ContextLost_, false);
+    canvas_.addEventListener('webglcontextrestored', ContextRestored_, false);
+  }
+
+  function InitializeWebGL_() {
+    gl_ = canvas_.getContext('webgl') || canvas_.getContext('experimental-webgl');
+    if (null === gl_) {
+      return false;
+    }
+    gl_ = WebGLDebugUtils.makeDebugContext(gl_);
+
+    gl_.enable(gl_.DEPTH_TEST);
+    gl_.disable(gl_.CULL_FACE);
+    gl_.frontFace(gl_.CW);
+  }
+
   function UpdateFrustum_() {
     frustum_.width = Math.max(document.documentElement.clientWidth, window.innerWidth || 0);
     frustum_.height = Math.max(document.documentElement.clientHeight, window.innerHeight || 0);
