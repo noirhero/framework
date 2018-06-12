@@ -29,7 +29,7 @@ function Instance(animation) {
     if(new_state === state_) {
       return;
     }
-    
+
     state_ = new_state;
     duration_ = 0;
   };
@@ -65,6 +65,6 @@ function Instance(animation) {
     vec3.create(),
   ];
 
-  var state_ = 'idle';
+  var state_ = 'idle_l';
   var duration_ = 0;
 }

@@ -11,7 +11,7 @@ function Actor(res_mng, pipeline) {
     InitializeInputs_();
 
     var world_transform = instance_.GetWorldTransform();
-    mat4.scale(world_transform, world_transform, [200, 200, 1]);
+    mat4.scale(world_transform, world_transform, [200, 100, 1]);
   };
 
   this.Update = function(dt) {
@@ -36,18 +36,24 @@ function Actor(res_mng, pipeline) {
 
   var Keydown_ = function(event) {
     var key_code = event.code;
-    if(-1 !== key_code.indexOf('Arrow')) {
-      instance_.SetState('walk');
+    if(-1 !== key_code.indexOf('ArrowLeft')) {
+      instance_.SetState('walk_l');
     }
-    else if(-1 !== key_code.indexOf('Space')) {
-      instance_.SetState('attack');
+    else if(-1 !== key_code.indexOf('ArrowRight')) {
+      instance_.SetState('walk_r');
     }
+    // else if(-1 !== key_code.indexOf('Space')) {
+    //   instance_.SetState('attack');
+    // }
   };
 
   var Keyup_ = function(event) {
     var key_code = event.code;
-    if(-1 !== key_code.indexOf('Arrow')) {
-      instance_.SetState('idle');
+    if(-1 !== key_code.indexOf('ArrowLeft')) {
+      instance_.SetState('idle_l');
+    }
+    else if(-1 !== key_code.indexOf('ArrowRight')) {
+      instance_.SetState('idle_r');
     }
   };
 
