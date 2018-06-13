@@ -39,7 +39,7 @@ function Texture(gl, src) {
   /*
   private functions
   */
-  var OnLoadImage_ = function() {
+  function OnLoadImage_() {
     gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture(gl.TEXTURE_2D, texture_);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image_);
@@ -48,7 +48,7 @@ function Texture(gl, src) {
     gl.bindTexture(gl.TEXTURE_2D, null);
 
     image_ = null;
-  };
+  }
 
 
 

@@ -6,6 +6,7 @@ function Actor(res_mng, pipeline) {
   */
   this.Initialize = function(url) {
     instance_ = new Instance(res_mng.GetAnimation(url));
+    instance_.SetState('idle_l');
     pipeline.AddInstance(instance_);
 
     InitializeInputs_();
@@ -29,12 +30,12 @@ function Actor(res_mng, pipeline) {
   /*
   private functions
   */
-  var InitializeInputs_ = function() {
+  function InitializeInputs_() {
     document.addEventListener('keydown', Keydown_, false);
     document.addEventListener('keyup', Keyup_, false);
-  };
+  }
 
-  var Keydown_ = function(event) {
+  function Keydown_(event) {
     var key_code = event.code;
     if(-1 !== key_code.indexOf('ArrowLeft')) {
       instance_.SetState('walk_l');
@@ -45,9 +46,9 @@ function Actor(res_mng, pipeline) {
     // else if(-1 !== key_code.indexOf('Space')) {
     //   instance_.SetState('attack');
     // }
-  };
+  }
 
-  var Keyup_ = function(event) {
+  function Keyup_(event) {
     var key_code = event.code;
     if(-1 !== key_code.indexOf('ArrowLeft')) {
       instance_.SetState('idle_l');
@@ -55,7 +56,7 @@ function Actor(res_mng, pipeline) {
     else if(-1 !== key_code.indexOf('ArrowRight')) {
       instance_.SetState('idle_r');
     }
-  };
+  }
 
 
   /*

@@ -34,6 +34,7 @@ function Pipeline(gl) {
 
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
 
+    var fill_index = 0;
     for(var i = 0; i < num_instances; ++i) {
       var instance = instances_[i];
 
@@ -41,17 +42,18 @@ function Pipeline(gl) {
         continue;
       }
 
-      instance.FillVertices(vertices_, quad_position_);
+      instance.FillVertices(fill_index * vertex_stride_, vertices_, quad_position_);
+      ++fill_index;
     }
-
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+
     gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, 20, 0);
     gl.enableVertexAttribArray(a_world_pos_);
     gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, 20, 12);
     gl.enableVertexAttribArray(a_texcoord_pos_);
 
-    gl.drawElements(gl.TRIANGLES, num_index_ * index_stride_, gl.UNSIGNED_SHORT, 0);
+    gl.drawElements(gl.TRIANGLES, fill_index * index_stride_, gl.UNSIGNED_SHORT, 0);
   };
 
   this.AddInstance = function(instance) {

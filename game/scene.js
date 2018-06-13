@@ -45,7 +45,7 @@ function Scene() {
   /*
   private functions
   */
-  var Update_ = function() {
+  function Update_() {
     timer_.Update();
 
     projection_.SetFrustum(context_.GetFrustum());
@@ -54,14 +54,14 @@ function Scene() {
     Updateactors_(timer_.GetDelta());
 
     pipeline_.Run();
-  };
+  }
 
-  var Updateactors_ = function(dt) {
+  function Updateactors_(dt) {
     var num_objects = actors_.length;
     for(var i = 0; i < num_objects; ++i) {
       actors_[i].Update(dt);
     }
-  };
+  }
 
 
 

@@ -15,16 +15,18 @@ function Animation(url, res_mng) {
   this.GetTextureCoordinate = function(key, duration) {
     var frame_info = frame_infos_[key];
 
-    if(frame_info.total_duration < duration) {
-      duration %= frame_info.total_duration;
-    }
+    if(frame_info) {
+      if(frame_info.total_duration < duration) {
+        duration %= frame_info.total_duration;
+      }
 
-    var frames = frame_info.frames;
-    var num_frames = frames.length;
-    for(var i = 0; i < num_frames; ++i) {
-      var frame = frames[i];
-      if(frame.start <= duration && frame.end >= duration) {
-        return frame.rect;
+      var frames = frame_info.frames;
+      var num_frames = frames.length;
+      for(var i = 0; i < num_frames; ++i) {
+        var frame = frames[i];
+        if(frame.start <= duration && frame.end >= duration) {
+          return frame.rect;
+        }
       }
     }
 
@@ -44,9 +46,9 @@ function Animation(url, res_mng) {
   /*
   private functions
   */
-  var Initialize_ = function() {
+  function Initialize_() {
     read_file_ = new ReadFile(url, ReadAnimationData_);
-  };
+  }
 
   function ReadAnimationData_(json_text) {
     var data = JSON.parse(json_text);

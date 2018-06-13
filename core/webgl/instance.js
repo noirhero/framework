@@ -8,20 +8,19 @@ function Instance(animation) {
     duration_ += dt;
   };
 
-  this.FillVertices = function(dest_vertices, quad_position) {
+  this.FillVertices = function(offset, dest_vertices, quad_position) {
     var current_texcoord = animation.GetTextureCoordinate(state_, duration_);
 
-    var vertex_offset = 0;
     var texcoord_offset = 0;
     for(var i = 0; i < 4; ++i) {
       var world_position = world_position_[0];
       vec3.transformMat4(world_position, quad_position[i], world_transform_);
 
-      dest_vertices[vertex_offset++] = world_position[0];
-      dest_vertices[vertex_offset++] = world_position[1];
-      dest_vertices[vertex_offset++] = world_position[2];
-      dest_vertices[vertex_offset++] = current_texcoord[texcoord_offset++];
-      dest_vertices[vertex_offset++] = current_texcoord[texcoord_offset++];
+      dest_vertices[offset++] = world_position[0];
+      dest_vertices[offset++] = world_position[1];
+      dest_vertices[offset++] = world_position[2];
+      dest_vertices[offset++] = current_texcoord[texcoord_offset++];
+      dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     }
   };
 
@@ -40,10 +39,6 @@ function Instance(animation) {
 
   this.GetAnimation = function() {
     return animation;
-  };
-
-  this.GetTextureCoordinate = function() {
-    return animation.GetTextureCoordinate(state_, duration_);
   };
 
 
@@ -65,6 +60,6 @@ function Instance(animation) {
     vec3.create(),
   ];
 
-  var state_ = 'idle_l';
+  var state_ = null;
   var duration_ = 0;
 }

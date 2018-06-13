@@ -26,15 +26,15 @@ function ResourceManager(context) {
   /*
   private functions
   */
-  var CreateTexture_ = function(url) {
+  function CreateTexture_(url) {
     return context.CreateTexture(url);
-  };
+  }
 
-  var CreateAnimation_ = function(url) {
+  function CreateAnimation_(url) {
     return new Animation(url, this);
-  };
+  }
 
-  var CreateResource_ = function(url, res_array, create_fn) {
+  function CreateResource_(url, res_array, create_fn) {
     var resource = res_array[url];
     if(!resource) {
       resource = {
@@ -47,9 +47,9 @@ function ResourceManager(context) {
 
     ++resource.ref_count;
     return resource.data;
-  };
+  }
 
-  var DeleteResource_ = function(data, res_array) {
+  function DeleteResource_(data, res_array) {
     var url = data.GetSrc();
     var resource = res_array[url];
     if(!resource) {
@@ -60,7 +60,7 @@ function ResourceManager(context) {
     if(0 >= resource.ref_count) {
       delete res_array[url];
     }
-  };
+  }
 
 
 
