@@ -6,13 +6,10 @@ function Actor(res_mng, pipeline) {
   */
   this.Initialize = function(url) {
     instance_ = new Instance(res_mng.GetAnimation(url));
-    instance_.SetState('idle_l');
+    instance_.SetState('idle_l', RandomRanged(0, 1000));
     pipeline.AddInstance(instance_);
 
     InitializeInputs_();
-
-    var world_transform = instance_.GetWorldTransform();
-    mat4.scale(world_transform, world_transform, [200, 100, 1]);
   };
 
   this.Update = function(dt) {
@@ -23,6 +20,10 @@ function Actor(res_mng, pipeline) {
     res_mng.DeleteAnimation(instance_.GetAnimation());
     pipeline.DeleteInstance(instance_);
     instance_ = null;
+  };
+
+  this.GetWorldTransform = function() {
+    return instance_.GetWorldTransform();
   };
 
 

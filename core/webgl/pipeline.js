@@ -48,9 +48,9 @@ function Pipeline(gl) {
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
 
-    gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, 20, 0);
+    gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, vertex_stride_, 0);
     gl.enableVertexAttribArray(a_world_pos_);
-    gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, 20, 12);
+    gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, vertex_stride_, 12);
     gl.enableVertexAttribArray(a_texcoord_pos_);
 
     gl.drawElements(gl.TRIANGLES, fill_index * index_stride_, gl.UNSIGNED_SHORT, 0);
@@ -111,6 +111,7 @@ function Pipeline(gl) {
 
       'void main() {',
       ' gl_FragColor = texture2D(uAlbedo, vTextureCoord);',
+      ' gl_FragColor.rgb *= gl_FragColor.a;',
       '}',
     ].join('\n'));
     if (null === fs_) {
@@ -170,14 +171,15 @@ function Pipeline(gl) {
   }
 
   function CreateIndexBuffer_() {
+    var offset_i = 0;
     for(var i = 0; i < num_index_; ++i) {
-      var offset = i * index_stride_;
-      indices_[offset] = offset;
-      indices_[offset + 1] = offset + 1;
-      indices_[offset + 2] = offset + 2;
-      indices_[offset + 3] = offset + 2;
-      indices_[offset + 4] = offset + 1;
-      indices_[offset + 5] = offset + 3;
+      var offset_v = i * quad_stride_;
+      indices_[offset_i++] = offset_v;
+      indices_[offset_i++] = offset_v + 1;
+      indices_[offset_i++] = offset_v + 2;
+      indices_[offset_i++] = offset_v + 2;
+      indices_[offset_i++] = offset_v + 1;
+      indices_[offset_i++] = offset_v + 3;
     }
     index_buffer_ = CreateBuffer_(gl.ELEMENT_ARRAY_BUFFER, indices_, gl.STATIC_DRAW);
   }
@@ -205,12 +207,13 @@ function Pipeline(gl) {
 
   var transform_vp_ = mat4.create();
 
-  var num_vertex_ = 1;
+  var num_vertex_ = 100;
   var vertex_stride_ = 20;
   var vertices_ = new Float32Array(num_vertex_ * vertex_stride_);
 
-  var num_index_ = 1;
+  var num_index_ = 100;
   var index_stride_ = 6;
+  var quad_stride_ = 4;
   var indices_ = new Uint16Array(num_index_ * index_stride_);
 
   var vertex_buffer_ = null;

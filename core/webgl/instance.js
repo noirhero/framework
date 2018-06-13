@@ -13,24 +13,23 @@ function Instance(animation) {
 
     var texcoord_offset = 0;
     for(var i = 0; i < 4; ++i) {
-      var world_position = world_position_[0];
-      vec3.transformMat4(world_position, quad_position[i], world_transform_);
+      vec3.transformMat4(world_position_, quad_position[i], world_transform_);
 
-      dest_vertices[offset++] = world_position[0];
-      dest_vertices[offset++] = world_position[1];
-      dest_vertices[offset++] = world_position[2];
+      dest_vertices[offset++] = world_position_[0];
+      dest_vertices[offset++] = world_position_[1];
+      dest_vertices[offset++] = world_position_[2];
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     }
   };
 
-  this.SetState = function(new_state) {
+  this.SetState = function(new_state, duration) {
     if(new_state === state_) {
       return;
     }
 
     state_ = new_state;
-    duration_ = 0;
+    duration_ = (undefined !== duration) ? duration : 0;
   };
 
   this.GetWorldTransform = function() {
@@ -53,12 +52,7 @@ function Instance(animation) {
   private variables
   */
   var world_transform_ = mat4.create();
-  var world_position_ = [
-    vec3.create(),
-    vec3.create(),
-    vec3.create(),
-    vec3.create(),
-  ];
+  var world_position_ = vec3.create();
 
   var state_ = null;
   var duration_ = 0;
