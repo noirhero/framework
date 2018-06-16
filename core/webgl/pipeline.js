@@ -35,16 +35,17 @@ function Pipeline(gl) {
     gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
 
     var fill_index = 0;
+    var instance = null;
     for(var i = 0; i < num_instances; ++i) {
-      var instance = instances_[i];
-
-      if(false == instance.GetAnimation().BindTexture(0, u_albedo_)) {
+      instance = instances_[i];
+      if(0 === i && false == instance.GetAnimation().BindTexture(0, u_albedo_)) {
         continue;
       }
 
       instance.FillVertices(fill_index * vertex_stride_, vertices_, quad_position_);
       ++fill_index;
     }
+
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
 
