@@ -9,10 +9,10 @@ function Context() {
     InitializeCanvas_();
     InitializeWebGL_();
 
-    // // debug simulation
-    // window.addEventListener('mousedown', function() {
-    //   canvas_.loseContext();
-    // });
+    // debug simulation
+    window.addEventListener('mousedown', function() {
+      canvas_.loseContext();
+    });
 
     return true;
   };
@@ -75,16 +75,24 @@ function Context() {
   }
 
   function InitializeWebGL_() {
-    gl_ = canvas_.getContext('webgl') || canvas_.getContext('experimental-webgl');
+    gl_ = canvas_.getContext('webgl', {
+      premultipliedAlpha: false
+    });
     if (null === gl_) {
       return false;
     }
     gl_ = WebGLDebugUtils.makeDebugContext(gl_);
 
-    gl_.disable(gl_.DEPTH_TEST);
+    gl_.enable(gl_.DEPTH_TEST);
+    gl_.depthFunc(gl_.GREATER);
+
     gl_.disable(gl_.CULL_FACE);
     gl_.frontFace(gl_.CW);
     gl_.enable(gl_.BLEND);
+    gl_.blendFuncSeparate(gl_.SRC_ALPHA, gl_.ONE_MINUS_SRC_ALPHA, gl_.ONE, gl_.ONE_MINUS_SRC_ALPHA);
+
+    gl_.clearColor(0, 0, 1, 1);
+    gl_.clearDepth(0);
   }
 
   function UpdateFrustum_() {
@@ -106,7 +114,6 @@ function Context() {
   function Clear_() {
     UpdateViewport_();
 
-    gl_.clearColor(1, 0, 0, 0);
     gl_.clear(gl_.COLOR_BUFFER_BIT | gl_.DEPTH_BUFFER_BIT);
   }
 
@@ -123,6 +130,17 @@ function Context() {
   }
 
   function ContextRestored_() {
+    gl_.enable(gl_.DEPTH_TEST);
+    gl_.depthFunc(gl_.GREATER);
+
+    gl_.disable(gl_.CULL_FACE);
+    gl_.frontFace(gl_.CW);
+    gl_.enable(gl_.BLEND);
+    gl_.blendFuncSeparate(gl_.SRC_ALPHA, gl_.ONE_MINUS_SRC_ALPHA, gl_.ONE, gl_.ONE_MINUS_SRC_ALPHA);
+
+    gl_.clearColor(0, 0, 1, 1);
+    gl_.clearDepth(0);
+
     var num_resources = gl_resources_.length;
     for (var i = 0; i < num_resources; ++i) {
       gl_resources_[i].Initialize();
@@ -146,7 +164,7 @@ function Context() {
     y: 0,
     width: 1920,
     height: 1200,
-    near: 1,
+    near: -1000,
     far: 1000,
   };
 

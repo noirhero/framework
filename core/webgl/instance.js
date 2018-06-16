@@ -17,7 +17,7 @@ function Instance(animation) {
 
       dest_vertices[offset++] = world_position_[0];
       dest_vertices[offset++] = world_position_[1];
-      dest_vertices[offset++] = world_position_[2];
+      dest_vertices[offset++] = world_transform_[13];
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     }

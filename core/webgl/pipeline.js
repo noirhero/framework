@@ -111,7 +111,9 @@ function Pipeline(gl) {
 
       'void main() {',
       ' gl_FragColor = texture2D(uAlbedo, vTextureCoord);',
-      ' gl_FragColor.rgb *= gl_FragColor.a;',
+      ' if(0.0 == gl_FragColor.a) {',
+      '   discard;',
+      ' }',
       '}',
     ].join('\n'));
     if (null === fs_) {

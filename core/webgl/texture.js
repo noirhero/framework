@@ -24,7 +24,6 @@ function Texture(gl, src) {
     }
 
     gl.activeTexture(gl.TEXTURE0 + index);
-    gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
     gl.bindTexture(gl.TEXTURE_2D, texture_);
     gl.uniform1i(sampler_pos, index);
 
