@@ -104,7 +104,7 @@ function Animation(url, res_mng) {
   var width_ = 0;
   var height_ = 0;
 
-  var frame_infos_ = null;
+  var frame_infos_ = {};
   var empty_texcoord_ = [
     0.0, 1.0,
     1.0, 1.0,
