@@ -8,12 +8,16 @@ function Main() {
 
   var world_transform = null;
   var actor = null;
-  for(var i = 0; i<100; ++i) {
+  for(var i = 0; i<2; ++i) {
     actor = scene.ActorAssignment();
     actor.Initialize('data/animations/skeleton.json');
 
+    if(0 === i) {
+      actor.SetOwner(true);
+    }
+
     world_transform = actor.GetWorldTransform();
-    mat4.translate(world_transform, world_transform, [RandomRanged(-300, 300), RandomRanged(-100, 100), 0]);
+  //  mat4.translate(world_transform, world_transform, [RandomRanged(-300, 300), RandomRanged(-100, 100), 0]);
     mat4.scale(world_transform, world_transform, [200, 100, 1]);
   }
 
