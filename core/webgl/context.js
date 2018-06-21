@@ -83,6 +83,10 @@ function Context() {
     }
     gl_ = WebGLDebugUtils.makeDebugContext(gl_);
 
+    InitialieWebGLStates_();
+  }
+
+  function InitialieWebGLStates_() {
     gl_.enable(gl_.DEPTH_TEST);
     gl_.depthFunc(gl_.GREATER);
 
@@ -91,7 +95,7 @@ function Context() {
     gl_.enable(gl_.BLEND);
     gl_.blendFuncSeparate(gl_.SRC_ALPHA, gl_.ONE_MINUS_SRC_ALPHA, gl_.ONE, gl_.ONE_MINUS_SRC_ALPHA);
 
-    gl_.clearColor(0, 0, 1, 1);
+    gl_.clearColor(0.25, 0.25, 0.75, 1);
     gl_.clearDepth(0);
   }
 
@@ -130,16 +134,7 @@ function Context() {
   }
 
   function ContextRestored_() {
-    gl_.enable(gl_.DEPTH_TEST);
-    gl_.depthFunc(gl_.GREATER);
-
-    gl_.disable(gl_.CULL_FACE);
-    gl_.frontFace(gl_.CW);
-    gl_.enable(gl_.BLEND);
-    gl_.blendFuncSeparate(gl_.SRC_ALPHA, gl_.ONE_MINUS_SRC_ALPHA, gl_.ONE, gl_.ONE_MINUS_SRC_ALPHA);
-
-    gl_.clearColor(0, 0, 1, 1);
-    gl_.clearDepth(0);
+    InitialieWebGLStates_();
 
     var num_resources = gl_resources_.length;
     for (var i = 0; i < num_resources; ++i) {

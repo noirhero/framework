@@ -30,21 +30,35 @@ function Pipeline(gl) {
     }
 
     gl.useProgram(program_);
-    gl.uniformMatrix4fv(u_transform_vp_, false, transform_vp_);
-
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
 
     var fill_index = 0;
     var instance = null;
+    var current_animation = null;
+    var prev_bind_animation = null;
+
     for(var i = 0; i < num_instances; ++i) {
       instance = instances_[i];
-      if(0 === i && false == instance.GetAnimation().BindTexture(0, u_albedo_)) {
-        continue;
+      current_animation = instance.GetAnimation();
+
+      if(prev_bind_animation !== current_animation) {
+        if(false == current_animation.BindTexture(0, u_albedo_)) {
+          continue;
+        }
+
+        prev_bind_animation = current_animation;
       }
 
       instance.FillVertices(fill_index * vertex_stride_, vertices_, quad_position_);
       ++fill_index;
     }
+
+    if(0 === fill_index) {
+      return;
+    }
+
+    gl.uniformMatrix4fv(u_transform_vp_, false, transform_vp_);
+
+    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
 
     gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
     gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
