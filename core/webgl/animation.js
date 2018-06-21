@@ -12,6 +12,10 @@ function Animation(url, res_mng) {
     return texture_.Bind(index, sampler_pos);
   };
 
+  var num_profile = 0;
+  var start_profile = 0;
+  var end_profile = 0;
+  var total_profile = 0;
   this.GetTextureCoordinate = function(key, duration) {
     var frame_info = frame_infos_[key];
 
@@ -20,14 +24,20 @@ function Animation(url, res_mng) {
         duration %= frame_info.total_duration;
       }
 
+      var result_rect = null;
       var frames = frame_info.frames;
-      var num_frames = frames.length;
-      for(var i = 0; i < num_frames; ++i) {
-        var frame = frames[i];
-        if(frame.start <= duration && frame.end >= duration) {
-          return frame.rect;
-        }
-      }
+
+      ++num_profile;
+      start_profile = Date.now();
+
+      //result_rect = ForFind_(frames, duration);
+      result_rect = RecursiveFind_(frames, duration, 0, frames.length);
+
+      end_profile = Date.now();
+      total_profile += (end_profile - start_profile);
+      //console.log(`Profile : ${total_profile / num_profile}`);
+
+      return result_rect;
     }
 
     return empty_texcoord_;
@@ -46,6 +56,36 @@ function Animation(url, res_mng) {
   /*
   private functions
   */
+  function RecursiveFind_(frames, duration, start, end) {
+    var step = end - start;
+    var offset = (0 === (step % 2)) ? 0 : 1;
+    var pivot = start + Math.round(step / 2) - offset;
+
+    var frame = frames[pivot];
+    if(frame.start > duration) {
+      return RecursiveFind_(frames, duration, start, pivot);
+    }
+    else if(frame.end < duration) {
+      return RecursiveFind_(frames, duration, pivot, end);
+    }
+
+    return frame.rect;
+  }
+
+  function ForFind_(frames, duration) {
+    var num_frames = frames.length;
+    var frame = null;
+
+    for(var i = 0; i < num_frames; ++i) {
+      frame = frames[i];
+      if(frame.start <= duration && frame.end >= duration) {
+        return frame.rect;
+      }
+    }
+
+    return empty_texcoord_;
+  }
+
   function Initialize_() {
     read_file_ = new ReadFile(url, ReadAnimationData_);
   }
