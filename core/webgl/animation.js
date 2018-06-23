@@ -12,10 +12,6 @@ function Animation(url, res_mng) {
     return texture_.Bind(index, sampler_pos);
   };
 
-  var num_profile = 0;
-  var start_profile = 0;
-  var end_profile = 0;
-  var total_profile = 0;
   this.GetTextureCoordinate = function(key, duration) {
     var frame_info = frame_infos_[key];
 
@@ -24,20 +20,10 @@ function Animation(url, res_mng) {
         duration %= frame_info.total_duration;
       }
 
-      var result_rect = null;
+      //return ForFind_(frame_info.frames, duration);
+
       var frames = frame_info.frames;
-
-      ++num_profile;
-      start_profile = Date.now();
-
-      //result_rect = ForFind_(frames, duration);
-      result_rect = RecursiveFind_(frames, duration, 0, frames.length);
-
-      end_profile = Date.now();
-      total_profile += (end_profile - start_profile);
-      //console.log(`Profile : ${total_profile / num_profile}`);
-
-      return result_rect;
+      return RecursiveFind_(frames, duration, 0, frames.length);
     }
 
     return empty_texcoord_;
