@@ -14,6 +14,28 @@ function Context() {
       canvas_.loseContext();
     });
 
+    // two = new Two({
+    //   'type': Two.Types.webgl,
+    //   'domElement': canvas_,
+    //   'width': frustum_.width,
+    //   'height': frustum_.height,
+    //   'overdraw': false,
+    // });
+    //
+    // // two has convenience methods to create shapes.
+    // var circle = two.makeCircle(72, 100, 50);
+    // var rect = two.makeRectangle(213, 100, 100, 100);
+    //
+    // // The object returned has many stylable properties:
+    // circle.fill = '#FF8000';
+    // circle.stroke = 'orangered'; // Accepts all valid css color
+    // circle.linewidth = 5;
+    //
+    // rect.fill = 'rgb(0, 200, 255)';
+    // rect.opacity = 0.75;
+    // rect.noStroke();
+    // two.update();
+
     return true;
   };
 
@@ -21,6 +43,7 @@ function Context() {
     frame_id_ = frame_fn_(run_fn_);
 
     Clear_();
+    //two.render();
     tick_fn_();
   };
 
@@ -167,4 +190,6 @@ function Context() {
   var tick_fn_ = null;
   var frame_fn_ = window.requestAnimationFrame || window.mozRequestAnimationFrame || window.webkitRequestAnimationFrame || window.msRequestAnimationFrame;
   var cancel_fram_fn_ = window.cancelAnimationFrame || window.mozCancelAnimationFrame;
+
+  //var two = null;
 }

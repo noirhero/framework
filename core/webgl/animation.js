@@ -20,14 +20,10 @@ function Animation(url, res_mng) {
         duration %= frame_info.total_duration;
       }
 
+      //return ForFind_(frame_info.frames, duration);
+
       var frames = frame_info.frames;
-      var num_frames = frames.length;
-      for(var i = 0; i < num_frames; ++i) {
-        var frame = frames[i];
-        if(frame.start <= duration && frame.end >= duration) {
-          return frame.rect;
-        }
-      }
+      return RecursiveFind_(frames, duration, 0, frames.length);
     }
 
     return empty_texcoord_;
@@ -46,6 +42,36 @@ function Animation(url, res_mng) {
   /*
   private functions
   */
+  function RecursiveFind_(frames, duration, start, end) {
+    var step = end - start;
+    var offset = (0 === (step % 2)) ? 0 : 1;
+    var pivot = start + Math.round(step / 2) - offset;
+
+    var frame = frames[pivot];
+    if(frame.start > duration) {
+      return RecursiveFind_(frames, duration, start, pivot);
+    }
+    else if(frame.end < duration) {
+      return RecursiveFind_(frames, duration, pivot, end);
+    }
+
+    return frame.rect;
+  }
+
+  function ForFind_(frames, duration) {
+    var num_frames = frames.length;
+    var frame = null;
+
+    for(var i = 0; i < num_frames; ++i) {
+      frame = frames[i];
+      if(frame.start <= duration && frame.end >= duration) {
+        return frame.rect;
+      }
+    }
+
+    return empty_texcoord_;
+  }
+
   function Initialize_() {
     read_file_ = new ReadFile(url, ReadAnimationData_);
   }
