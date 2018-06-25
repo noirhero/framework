@@ -43,7 +43,7 @@ function Context() {
     frame_id_ = frame_fn_(run_fn_);
 
     Clear_();
-    two.render();
+    //two.render();
     tick_fn_();
   };
 
