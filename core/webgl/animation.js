@@ -12,12 +12,21 @@ function Animation(url, res_mng) {
     return texture_.Bind(index, sampler_pos);
   };
 
-  this.GetTextureCoordinate = function(key, duration) {
+  this.GetTextureCoordinate = function(state_info) {
+    var key = state_info.state;
+    var duration = state_info.duration;
     var frame_info = frame_infos_[key];
 
     if(frame_info) {
       if(frame_info.total_duration < duration) {
         duration %= frame_info.total_duration;
+        state_info.duration = duration;
+
+        if('once' == frame_info.mode) {
+          state_info.state = frame_info.next_state;
+
+          return this.GetTextureCoordinate(state_info);
+        }
       }
 
       //return ForFind_(frame_info.frames, duration);
@@ -35,6 +44,16 @@ function Animation(url, res_mng) {
 
   this.GetTextureSrc = function() {
     return texture_ ? texture_.GetSrc() : undefined;
+  };
+
+  this.SetMode = function(state, mode, next_state) {
+    var frame_info = frame_infos_[mode];
+    if(!frame_info) {
+      return false;
+    }
+
+    frame_info.mode = mode;
+    frame_info.next_state = next_state;
   };
 
 
@@ -94,6 +113,8 @@ function Animation(url, res_mng) {
         frame_info = frame_infos_[state_name]  = {
           'total_duration': 0,
           'frames': [],
+          'mode': 'loop',
+          'next_state': undefined,
         };
       }
 
@@ -117,6 +138,14 @@ function Animation(url, res_mng) {
     }
 
     read_file_ = null;
+
+    var attack_l = frame_infos_['attack_l'];
+    attack_l.mode = 'once';
+    attack_l.next_state = 'idle_l';
+
+    var attack_r = frame_infos_['attack_r'];
+    attack_r.mode = 'once';
+    attack_r.next_state = 'idle_r';
   }
 
 

@@ -14,7 +14,7 @@ function Main() {
 
   var world_transform = null;
   var actor = null;
-  for(var i = 0; i<2; ++i) {
+  for(var i = 0; i<1; ++i) {
     actor = scene.ActorAssignment();
     actor.Initialize('data/animations/skeleton.json');
 

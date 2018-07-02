@@ -5,11 +5,11 @@ function Instance(animation) {
   public functions
   */
   this.Update = function(dt) {
-    duration_ += dt;
+    state_.duration += dt;
   };
 
   this.FillVertices = function(offset, dest_vertices, quad_position) {
-    var current_texcoord = animation.GetTextureCoordinate(state_, duration_);
+    var current_texcoord = animation.GetTextureCoordinate(state_);
 
     var texcoord_offset = 0;
     for(var i = 0; i < 4; ++i) {
@@ -24,12 +24,12 @@ function Instance(animation) {
   };
 
   this.SetState = function(new_state, duration) {
-    if(new_state === state_) {
+    if(new_state === state_.state) {
       return;
     }
 
-    state_ = new_state;
-    duration_ = (undefined !== duration) ? duration : 0;
+    state_.state = new_state;
+    state_.duration = (undefined !== duration) ? duration : 0;
   };
 
   this.GetWorldTransform = function() {
@@ -54,6 +54,8 @@ function Instance(animation) {
   var world_transform_ = mat4.create();
   var world_position_ = vec3.create();
 
-  var state_ = null;
-  var duration_ = 0;
+  var state_ = {
+    'state': null,
+    'duration': 0,
+  };
 }
