@@ -1,32 +1,36 @@
-function Scene() {
-  'use strict';
+'use strict';
+
+function Scene(context) {
+  let res_mng_ = null;
+  let timer_ = null;
+
+  let camera_ = null;
+  let projection_ = null;
+
+  let pipeline_ = null;
+  let actors_ = [];
 
   /*
   public functions
   */
   this.Initialize = function() {
-    context_ = new Context();
-    if (false === context_.Initialize()) {
-      alert('This browser does not support WebGL...');
-      return false;
-    }
-    context_.SetTickFunction(Update_);
+    context.SetTickFunction(Update_);
 
-    res_mng_ = new ResourceManager(context_);
+    res_mng_ = new ResourceManager(context);
     timer_ = new Timer();
 
     camera_ = new Camera();
     camera_.SetPosition(0, 0, 3);
     projection_ = new Projection();
 
-    pipeline_ = context_.CreatePipeline();
+    pipeline_ = context.CreatePipeline();
 
     timer_.Start();
     return true;
   };
 
   this.Start = function() {
-    context_.Run();
+    context.Run();
   };
 
   this.ActorAssignment = function() {
@@ -48,7 +52,7 @@ function Scene() {
   function Update_() {
     timer_.Update();
 
-    projection_.SetFrustum(context_.GetFrustum());
+    projection_.SetFrustum(context.GetFrustum());
     pipeline_.UpdateViewProjection(camera_, projection_);
 
     Updateactors_(timer_.GetDelta());
@@ -62,19 +66,4 @@ function Scene() {
       actors_[i].Update(dt);
     }
   }
-
-
-
-  /*
-  private variables
-  */
-  var context_ = null;
-  var res_mng_ = null;
-  var timer_ = null;
-
-  var camera_ = null;
-  var projection_ = null;
-
-  var pipeline_ = null;
-  var actors_ = [];
 }
