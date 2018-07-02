@@ -84,8 +84,6 @@ function Actor(res_mng, pipeline) {
 
     velocity_[0] = acceleration_[0] * dt;
     velocity_[1] = acceleration_[1] * dt;
-
-    // todo : velocity clamp(new_max_speed_)
   }
 
   function Moving(dt) {
