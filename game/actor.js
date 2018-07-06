@@ -48,9 +48,9 @@ function Actor(res_mng, pipeline) {
       if(input_.IsDownKey(input_enum_.SpaceBar)) {
         SetState_('attack');
       }
-      else {
-        SetState_('idle');
-      }
+      // else {
+      //   SetState_('idle');
+      // }
     }
     else {
       SetState_('walk');
