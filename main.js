@@ -1,6 +1,8 @@
-'use strict';
+// Copyright 2018 TAP, Inc. All Rights Reserved.
 
 function Main() {
+  'use strict';
+
   let context = new Context();
   if(false === context.Initialize()) {
     alert('This browser does not support WebGL...');
@@ -23,7 +25,7 @@ function Main() {
     }
 
     world_transform = actor.GetWorldTransform();
-  //  mat4.translate(world_transform, world_transform, [RandomRanged(-300, 300), RandomRanged(-100, 100), 0]);
+    // mat4.translate(world_transform, world_transform, [Math.RandomRanged(-300, 300), Math.RandomRanged(-100, 100), 0]);
     mat4.scale(world_transform, world_transform, [200, 100, 1]);
   }
 

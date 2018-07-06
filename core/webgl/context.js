@@ -1,3 +1,5 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
 function Context() {
   'use strict';
 
@@ -23,7 +25,6 @@ function Context() {
     frame_id_ = frame_fn_(run_fn_);
 
     Clear_();
-    //two.render();
     tick_fn_();
   };
 

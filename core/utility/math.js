@@ -1,9 +1,12 @@
-function RandomRanged(min, max) {
-  return Math.random() * (max - min) + min;
-}
+// Copyright 2018 TAP, Inc. All Rights Reserved.
 
-function Clamp(value, min, max) {
-  value = (value <= min) ? min :
-          (value >= max) ? max : value;
-  return value;
-}
+var Math = Math || {};
+
+Math.RandomRanged = function(min, max) {
+  'use strict';
+  return Math.random() * (max - min) + min;
+};
+
+Math.Clamp = function(value, min, max) {
+  return Math.min(Math.max(value, min), max);
+};
