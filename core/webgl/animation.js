@@ -1,3 +1,23 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
+var WebGL = WebGL || {};
+
+WebGL.Animation = function(url, on_load_fn) {
+  'use strict';
+
+  this.url_ = url;
+  this.on_load_fn_ = on_load_fn;
+};
+
+WebGL.Animation.prototype = Object.create(WebGL.Resource.prototype);
+WebGL.Animation.prototype.constructor = WebGL.Animation;
+
+WebGL.Animation.prototype.Initialize = function() {
+  'use strict';
+
+
+};
+
 function Animation(url, res_mng) {
   'use strict';
 
