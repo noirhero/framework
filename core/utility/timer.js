@@ -1,3 +1,5 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
 function Timer() {
   'use strict';
 
@@ -11,6 +13,7 @@ function Timer() {
   this.Update = function() {
     now_ = Date.now();
     delta_ = now_ - old_;
+    delta_ms_ = delta_ * 0.001;
     old_ = now_;
 
     second_ += delta_;
@@ -29,7 +32,7 @@ function Timer() {
   };
 
   this.GetDeltaMS = function() {
-    return delta_ * 0.001;
+    return delta_ms_;
   };
 
   this.GetFPS = function() {
@@ -44,6 +47,7 @@ function Timer() {
   var old_ = 0;
   var now_ = 0;
   var delta_ = 0;
+  var delta_ms_ = 0;
 
   var second_ = 0;
   var frame_ = 0;

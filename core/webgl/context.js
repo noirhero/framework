@@ -28,32 +28,26 @@ function Context() {
     tick_fn_();
   };
 
-  this.CreateTexture = function(src) {
-    var texture = new Texture(gl_, src);
-    texture.Initialize();
-
-    gl_resources_[gl_resources_.length] = texture;
-    return texture;
+  this.DeleteResource = function(resource) {
+    gl_resources_ = gl_resources_.filter(function(iter_resource) {
+      return resource !== iter_resource;
+    });
   };
 
-  this.DeleteTexture = function(texture) {
-    gl_resources_ = gl_resources_.filter(function(iter_texture) {
-      return texture !== iter_texture;
-    });
+  function InitializeAndInsertResource(resource, resources) {
+    resource.Initialize();
+
+    resources[resources.length] = resource;
+
+    return resource;
+  }
+
+  this.CreateTexture = function(src) {
+    return InitializeAndInsertResource(new WebGL.Texture(gl_, src), gl_resources_);
   };
 
   this.CreatePipeline = function() {
-    var pipeline = new Pipeline(gl_);
-    pipeline.Initialize();
-
-    gl_resources_[gl_resources_.length] = pipeline;
-    return pipeline;
-  };
-
-  this.DeletePipeline = function(pipeline) {
-    gl_resources_ = gl_resources_.filter(function(iter_pipeline) {
-      return pipeline !== iter_pipeline;
-    });
+    return InitializeAndInsertResource(new WebGL.Pipeline(gl_), gl_resources_);
   };
 
   this.SetTickFunction = function(tick_fn) {

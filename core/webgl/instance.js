@@ -1,3 +1,5 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
 function Instance(animation) {
   'use strict';
 
@@ -21,6 +23,10 @@ function Instance(animation) {
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
       dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     }
+  };
+
+  this.GetState = function() {
+    return state_.state;
   };
 
   this.SetState = function(new_state, duration) {

@@ -1,12 +1,15 @@
 // Copyright 2018 TAP, Inc. All Rights Reserved.
 
-var WebGL = WebGL || {};
-
-WebGL.Animation = function(url, on_load_fn) {
+WebGL.Animation = function(url, res_mng) {
   'use strict';
 
+  // WebGL.Resource.call(this); // Not needed!
+
   this.url_ = url;
-  this.on_load_fn_ = on_load_fn;
+  this.frame_infos_ = null;
+
+  this.res_mng_ = res_mng;
+  this.texture_ = null;
 };
 
 WebGL.Animation.prototype = Object.create(WebGL.Resource.prototype);
@@ -15,78 +18,72 @@ WebGL.Animation.prototype.constructor = WebGL.Animation;
 WebGL.Animation.prototype.Initialize = function() {
   'use strict';
 
+  function OnLoadAnimation_(json_text) {
+    const data = JSON.parse(json_text);
 
-};
+    this.texture_ = this.res_mng_.GetTexture(data.meta.image);
 
-function Animation(url, res_mng) {
-  'use strict';
+    const width = data.meta.size.w;
+    const height = data.meta.size.h;
 
-  /*
-  public functions
-  */
-  this.BindTexture = function(index, sampler_pos) {
-    if(!texture_) {
-      return false;
-    }
+    let frame_infos = {};
 
-    return texture_.Bind(index, sampler_pos);
-  };
+    const frames = data.frames;
+    for(const i in frames) {
+      const state_name = i.slice(0, i.indexOf(' '));
 
-  this.GetTextureCoordinate = function(state_info) {
-    var key = state_info.state;
-    var duration = state_info.duration;
-    var frame_info = frame_infos_[key];
-
-    if(frame_info) {
-      if(frame_info.total_duration < duration) {
-        duration %= frame_info.total_duration;
-        state_info.duration = duration;
-
-        if('once' == frame_info.mode) {
-          state_info.state = frame_info.next_state;
-
-          return this.GetTextureCoordinate(state_info);
-        }
+      let frame_info = frame_infos[state_name];
+      if(!frame_info) {
+        frame_info = frame_infos[state_name]  = {
+          total_duration: 0,
+          frames: [],
+          mode: 'loop',
+          next_state: undefined,
+        };
       }
 
-      //return ForFind_(frame_info.frames, duration);
+      const src_frame = frames[i];
+      const left = src_frame.frame.x / width;
+      const top = 1.0 - src_frame.frame.y / height;
+      const right = left + src_frame.frame.w / width;
+      const bottom = top - src_frame.frame.h / height;
 
-      var frames = frame_info.frames;
-      return RecursiveFind_(frames, duration, 0, frames.length);
+      frame_info.frames[frame_info.frames.length] = {
+        start: frame_info.total_duration,
+        end: frame_info.total_duration + src_frame.duration,
+        rect: [
+          left, top,
+          right, top,
+          left, bottom,
+          right, bottom,
+        ],
+      };
+      frame_info.total_duration += src_frame.duration;
     }
 
-    return empty_texcoord_;
-  };
+    let attack_l = frame_infos['attack_l'];
+    attack_l.mode = 'once';
+    attack_l.next_state = 'idle_l';
 
-  this.GetSrc = function() {
-    return url;
-  };
+    let attack_r = frame_infos['attack_r'];
+    attack_r.mode = 'once';
+    attack_r.next_state = 'idle_r';
 
-  this.GetTextureSrc = function() {
-    return texture_ ? texture_.GetSrc() : undefined;
-  };
+    this.frame_infos_ = frame_infos;
+  }
 
-  this.SetMode = function(state, mode, next_state) {
-    var frame_info = frame_infos_[mode];
-    if(!frame_info) {
-      return false;
-    }
+  ReadFile(this.url_, OnLoadAnimation_.bind(this));
+};
 
-    frame_info.mode = mode;
-    frame_info.next_state = next_state;
-  };
+WebGL.Animation.prototype.GetTextureCoordinate = function(state_info) {
+  'use strictr';
 
-
-
-  /*
-  private functions
-  */
   function RecursiveFind_(frames, duration, start, end) {
-    var step = end - start;
-    var offset = (0 === (step % 2)) ? 0 : 1;
-    var pivot = start + Math.round(step / 2) - offset;
+    const step = end - start;
+    const offset = (0 === (step % 2)) ? 0 : 1;
+    const pivot = start + Math.round(step / 2) - offset;
 
-    var frame = frames[pivot];
+    const frame = frames[pivot];
     if(frame.start > duration) {
       return RecursiveFind_(frames, duration, start, pivot);
     }
@@ -97,100 +94,53 @@ function Animation(url, res_mng) {
     return frame.rect;
   }
 
-  function ForFind_(frames, duration) {
-    var num_frames = frames.length;
-    var frame = null;
+  const key = state_info.state;
+  const frame_info = this.frame_infos_[key];
+  let duration = state_info.duration;
 
-    for(var i = 0; i < num_frames; ++i) {
-      frame = frames[i];
-      if(frame.start <= duration && frame.end >= duration) {
-        return frame.rect;
+  if(frame_info) {
+    if(frame_info.total_duration < duration) {
+      duration %= frame_info.total_duration;
+      state_info.duration = duration;
+
+      if('once' == frame_info.mode) {
+        state_info.state = frame_info.next_state;
+
+        return this.GetTextureCoordinate(state_info);
       }
     }
 
-    return empty_texcoord_;
+    const frames = frame_info.frames;
+    return RecursiveFind_(frames, duration, 0, frames.length);
   }
 
-  function Initialize_() {
-    read_file_ = new ReadFile(url, ReadAnimationData_);
+  return CONST.EMPTY_TEXCOORD;
+};
+
+WebGL.Animation.prototype.SetMode = function(state, mode, next_state) {
+  'use strict';
+
+  let frame_info = this.frame_infos_[state];
+  if(!frame_info) {
+    return false;
   }
 
-  function ReadAnimationData_(json_text) {
-    var data = JSON.parse(json_text);
+  frame_info.mode = mode;
+  frame_info.next_state = next_state;
+};
 
-    texture_ = res_mng.GetTexture(data.meta.image);
-    width_ = data.meta.size.w;
-    height_ = data.meta.size.h;
-
-    frame_infos_ = {};
-
-    var frames = data.frames;
-    for(var i in frames) {
-      var state_name = i.slice(0, i.indexOf(' '));
-
-      var frame_info = frame_infos_[state_name];
-      if(!frame_info) {
-        frame_info = frame_infos_[state_name]  = {
-          'total_duration': 0,
-          'frames': [],
-          'mode': 'loop',
-          'next_state': undefined,
-        };
-      }
-
-      var src_frame = frames[i];
-      var left = src_frame.frame.x / width_;
-      var top = 1.0 - src_frame.frame.y / height_;
-      var right = left + src_frame.frame.w / width_;
-      var bottom = top - src_frame.frame.h / height_;
-
-      frame_info.frames[frame_info.frames.length] = {
-        'start': frame_info.total_duration,
-        'end': frame_info.total_duration + src_frame.duration,
-        'rect': [
-          left, top,
-          right, top,
-          left, bottom,
-          right, bottom,
-        ],
-      };
-      frame_info.total_duration += src_frame.duration;
-    }
-
-    read_file_ = null;
-
-    var attack_l = frame_infos_['attack_l'];
-    attack_l.mode = 'once';
-    attack_l.next_state = 'idle_l';
-
-    var attack_r = frame_infos_['attack_r'];
-    attack_r.mode = 'once';
-    attack_r.next_state = 'idle_r';
+WebGL.Animation.prototype.BindTexture = function(index, sampler_pos) {
+  if(!this.texture_) {
+    return false;
   }
 
+  return this.texture_.Bind(index, sampler_pos);
+};
 
+WebGL.Animation.prototype.GetSrc = function() {
+  return this.url_;
+};
 
-  /*
-  private variables
-  */
-  var read_file_ = null;
-
-  var texture_ = null;
-  var width_ = 0;
-  var height_ = 0;
-
-  var frame_infos_ = {};
-  var empty_texcoord_ = [
-    0.0, 1.0,
-    1.0, 1.0,
-    0.0, 0.0,
-    1.0, 0.0,
-  ];
-
-
-
-  /*
-  process
-  */
-  Initialize_();
-}
+WebGL.Animation.prototype.GetTextureSrc = function() {
+  return this.texture_ ? this.texture_.GetSrc() : undefined;
+};

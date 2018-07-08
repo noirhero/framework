@@ -1,7 +1,5 @@
 // Copyright 2018 TAP, Inc. All Rights Reserved.
 
-var WebGL = WebGL || {};
-
 WebGL.Texture = function(gl, url) {
   'use strict';
 
@@ -31,6 +29,8 @@ WebGL.Texture.prototype.Initialize = function() {
     this.image_ = null;
   }
 
+  this.texture_ = this.gl_.createTexture();
+
   this.image_ = new Image();
   this.image_.onload = OnLoadImage_.bind(this);
   this.image_.src = this.url_;
@@ -59,63 +59,8 @@ WebGL.Texture.prototype.Bind = function(index, sampler_pos) {
   return true;
 };
 
-function Texture(gl, src) {
-  'use strict';
+WebGL.Texture.prototype.GetSrc = function() {
+  'use_strict';
 
-  /*
-  public functions
-  */
-  this.Initialize = function() {
-    texture_ = gl.createTexture();
-
-    image_ = new Image();
-    image_.onload = OnLoadImage_;
-    image_.src = src;
-  };
-
-  this.OnContextLost = function() {
-    if(image_ && image_.onload) {
-      image_.onload = null;
-    }
-  };
-
-  this.Bind = function(index, sampler_pos) {
-    if(null !== image_) {
-      return false;
-    }
-
-    gl.activeTexture(gl.TEXTURE0 + index);
-    gl.bindTexture(gl.TEXTURE_2D, texture_);
-    gl.uniform1i(sampler_pos, index);
-
-    return true;
-  };
-
-  this.GetSrc = function() {
-    return src;
-  };
-
-
-
-  /*
-  private functions
-  */
-  function OnLoadImage_() {
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
-    gl.bindTexture(gl.TEXTURE_2D, texture_);
-    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image_);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-    gl.bindTexture(gl.TEXTURE_2D, null);
-
-    image_ = null;
-  }
-
-
-
-  /*
-  private variables
-  */
-  var image_ = null;
-  var texture_ = null;
-}
+  return this.url_;
+};

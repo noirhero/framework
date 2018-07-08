@@ -35,7 +35,7 @@ function Actor(res_mng, pipeline) {
 
   this.SetOwner = function(flag) {
     is_owner_ = flag;
-  }
+  };
 
   /*
   private functions
@@ -45,12 +45,12 @@ function Actor(res_mng, pipeline) {
     var input_enum_ = input_.input_enum;
 
     if(0 === vec2.len(input_direction_)) {
-      if(input_.IsDownKey(input_enum_.SpaceBar)) {
+      if(input_.IsDownKey(input_enum_.SpaceBar) || -1 !== instance_.GetState().indexOf('attack')) {
         SetState_('attack');
       }
-      // else {
-      //   SetState_('idle');
-      // }
+      else {
+        SetState_('idle');
+      }
     }
     else {
       SetState_('walk');

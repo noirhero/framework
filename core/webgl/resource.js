@@ -8,10 +8,6 @@ WebGL.Resource = function(gl) {
   this.gl_ = gl;
 };
 
-WebGL.Resource.prototype.Initialize = function() {
-  'use strict';
-};
+WebGL.Resource.prototype.Initialize = function() {};
 
-WebGL.Resource.prototype.OnContextLost = function() {
-  'use strict';
-};
+WebGL.Resource.prototype.OnContextLost = function() {};
