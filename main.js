@@ -24,8 +24,9 @@ function Main() {
       actor.SetOwner(true);
     }
 
+    actor.SetTranslate(Math.RandomRanged(-300, 300), Math.RandomRanged(-100, 100));
+
     world_transform = actor.GetWorldTransform();
-    mat4.translate(world_transform, world_transform, [Math.RandomRanged(-300, 300), Math.RandomRanged(-100, 100), 0]);
     mat4.scale(world_transform, world_transform, [200, 100, 1]);
   }
 

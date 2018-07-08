@@ -1,5 +1,7 @@
-function Actor(res_mng, pipeline) {
+function Actor(res_mng, pipeline, col_scene) {
   'use strict';
+
+  let col_shape_ = null;
 
   /*
   public functions
@@ -11,6 +13,8 @@ function Actor(res_mng, pipeline) {
 
     input_ = new Input();
     input_.Initialize();
+
+    col_shape_ = col_scene.AssignmentBox(0, 0, 50, 50);
   };
 
   this.Update = function(dt) {
@@ -27,6 +31,14 @@ function Actor(res_mng, pipeline) {
     res_mng.DeleteAnimation(instance_.GetAnimation());
     pipeline.DeleteInstance(instance_);
     instance_ = null;
+  };
+
+  this.SetTranslate = function(x, y) {
+    let world_transform = instance_.GetWorldTransform();
+    world_transform[12] = x;
+    world_transform[13] = y;
+
+    col_shape_.UpdateTranslate(x, y);
   };
 
   this.GetWorldTransform = function() {
@@ -95,6 +107,13 @@ function Actor(res_mng, pipeline) {
     }
     if (velocity_[1]) {
       world_trans_[13] += velocity_[1] * dt;
+    }
+
+    col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
+    if(true === col_scene.Sweep(col_shape_)) {
+      const shape_pos = col_shape_.GetData().pos;
+      world_trans_[12] = shape_pos.x;
+      world_trans_[13] = shape_pos.y;
     }
   }
 

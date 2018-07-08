@@ -10,6 +10,8 @@ function Scene(context) {
   let pipeline_ = null;
   let actors_ = [];
 
+  let col_scene_ = null;
+
   /*
   public functions
   */
@@ -25,6 +27,8 @@ function Scene(context) {
 
     pipeline_ = context.CreatePipeline();
 
+    col_scene_ = new Col.Scene();
+
     timer_.Start();
     return true;
   };
@@ -34,7 +38,7 @@ function Scene(context) {
   };
 
   this.ActorAssignment = function() {
-    return actors_[actors_.length] = new Actor(res_mng_, pipeline_);
+    return actors_[actors_.length] = new Actor(res_mng_, pipeline_, col_scene_);
   };
 
   this.ActorRelease = function(actor) {
