@@ -8,8 +8,6 @@
 4. SAT https://github.com/jriecken/sat-js
 
 ## To do
-1. Animation mode. (loop, once...)
-2. Collision detection.
-3. Animation notify.
-4. Parallel fill vertices.
-5. GPGPU fill vertices.
+1. Animation notify.
+2. Collision debug draw.
+3. Touch move.
