@@ -74,7 +74,8 @@ function Context() {
 
   function InitializeWebGL_() {
     gl_ = canvas_.getContext('webgl', {
-      premultipliedAlpha: false
+      premultipliedAlpha: false,
+      antialias: false,
     });
     if (!gl_) {
       return false;
