@@ -23,7 +23,7 @@ function Actor(res_mng, pipeline, col_scene) {
     if(is_owner_) {
       ChangeInputState();
       CalcVelocity(dt);
-      Moving(dt);
+      Moving();
     }
   };
 
@@ -78,35 +78,62 @@ function Actor(res_mng, pipeline, col_scene) {
 
   function CalcVelocity(dt) {
     var input_direction_ = input_.GetInputDirection();
-    acceleration_[0] = input_direction_[0] * accel_rate_;
-    acceleration_[1] = input_direction_[1] * accel_rate_;
-
-    var zero_accel_ = (vec2.len(acceleration_) > 0) ? false : true;
+    var zero_accel_ = (vec2.sqrLen(input_direction_) > 0) ? false : true;
     if(zero_accel_) {
       BrakingVelocity(dt);
     }
     else {
+      vec2.scale(acceleration_, input_direction_, accel_rate_);
       var accel_dir_ = vec2.create();
-      vec2.normalize(accel_dir_, acceleration_);
+      var velocity_len_ = vec2.len(velocity_);
 
-      var velo_len_ = vec2.len(velocity_);
-      velocity_[0] = velocity_[0] - (velocity_[0] - accel_dir_[0] * velo_len_) * Math.min(dt * friction_, 1);
-      velocity_[1] = velocity_[1] - (velocity_[1] - accel_dir_[1] * velo_len_) * Math.min(dt * friction_, 1);
+      vec2.normalize(accel_dir_, acceleration_);
+      vec2.scale(accel_dir_, accel_dir_, velocity_len_);
+
+      var adjusted_friction_ = Math.min(dt * 0.001 * Friction_, 1);
+      var temp_velo_ = vec2.create();
+
+      // velocity_ = velocity_ - ((velocity_ - accel_dir_) * adjusted_friction_)
+      vec2.subtract(temp_velo_, velocity_, accel_dir_);
+      vec2.scale(temp_velo_, temp_velo_, adjusted_friction_);
+      vec2.subtract(velocity_, velocity_, temp_velo_);
     }
 
-    velocity_[0] = acceleration_[0] * dt;
-    velocity_[1] = acceleration_[1] * dt;
+    // velocity_ += acceleration_ * dt
+    vec2.scale(acceleration_, acceleration_, dt * 0.001);
+    vec2.add(velocity_, velocity_, acceleration_);
 
-    // todo : velocity clamp(new_max_speed_)
+    // clamp velocity
+    if(vec2.len(velocity_) > MaxVelocity_) {
+      vec2.normalize(velocity_, velocity_);
+      vec2.scale(velocity_, velocity_, MaxVelocity_);
+    }
   }
 
-  function Moving(dt) {
+  function BrakingVelocity(dt) {
+    vec2.set(acceleration_, 0, 0);
+
+    var reverse_accel_ = vec2.create();
+    vec2.normalize(reverse_accel_, velocity_);
+
+    reverse_accel_[0] = BrakeDeceleration_ * -reverse_accel_[0] * dt * 0.001;
+    reverse_accel_[1] = BrakeDeceleration_ * -reverse_accel_[1] * dt * 0.001;
+
+    velocity_[0] = velocity_[0] + ((-Friction_) * velocity_[0] + reverse_accel_[0]);
+    velocity_[1] = velocity_[1] + ((-Friction_) * velocity_[1] + reverse_accel_[1]);
+
+    if(BrakeStopVelocityLen_ >= vec2.len(velocity_)) {
+      vec2.set(velocity_, 0, 0);
+    }
+  }
+
+  function Moving() {
     var world_trans_ = instance_.GetWorldTransform();
     if(velocity_[0]) {
-      world_trans_[12] += velocity_[0] * dt;
+      world_trans_[12] += velocity_[0];
     }
     if (velocity_[1]) {
-      world_trans_[13] += velocity_[1] * dt;
+      world_trans_[13] += velocity_[1];
     }
 
     col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
@@ -114,22 +141,6 @@ function Actor(res_mng, pipeline, col_scene) {
       const shape_pos = col_shape_.GetData().pos;
       world_trans_[12] = shape_pos.x;
       world_trans_[13] = shape_pos.y;
-    }
-  }
-
-  function BrakingVelocity(dt) {
-    var reverse_accel_ = vec2.create();
-    vec2.normalize(reverse_accel_, velocity_);
-
-    reverse_accel_[0] = break_deceleration * -reverse_accel_[0];
-    reverse_accel_[1] = break_deceleration * -reverse_accel_[1];
-
-    velocity_[0] = velocity_[0] + ((-friction_) * velocity_[0] + reverse_accel_[0]) * dt;
-    velocity_[1] = velocity_[1] + ((-friction_) * velocity_[1] + reverse_accel_[1]) * dt;
-
-    if(BrakeStopVelocityLen >= vec2.len(velocity_)) {
-      velocity_[0] = 0;
-      velocity_[1] = 0;
     }
   }
 
@@ -150,10 +161,12 @@ function Actor(res_mng, pipeline, col_scene) {
   var state_ = 'idle';
   var direction_ = '_l';
 
-  var accel_rate_ = 0.005;
+  var accel_rate_ = 2;
   var acceleration_ = vec2.create();
   var velocity_ = vec2.create();
-  var break_deceleration = 1;
-  var friction_ = 1;
-  const BrakeStopVelocityLen = 1;
+
+  const MaxVelocity_ = 5;
+  const BrakeDeceleration_ = 0.1;
+  const Friction_ = 0.1;
+  const BrakeStopVelocityLen_ = 0.0001;
 }
