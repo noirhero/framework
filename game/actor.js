@@ -89,7 +89,7 @@ function Actor(res_mng, pipeline, col_scene) {
 
       vec2.normalize(accel_dir_, acceleration_);
       vec2.scale(accel_dir_, accel_dir_, velocity_len_);
-      
+
       var adjusted_friction_ = Math.min(dt * 0.001 * Friction_, 1);
       var temp_velo_ = vec2.create();
 
@@ -107,13 +107,6 @@ function Actor(res_mng, pipeline, col_scene) {
     if(vec2.len(velocity_) > MaxVelocity_) {
       vec2.normalize(velocity_, velocity_);
       vec2.scale(velocity_, velocity_, MaxVelocity_);
-    }
-
-    col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
-    if(true === col_scene.Sweep(col_shape_)) {
-      const shape_pos = col_shape_.GetData().pos;
-      world_trans_[12] = shape_pos.x;
-      world_trans_[13] = shape_pos.y;
     }
   }
 
@@ -142,6 +135,13 @@ function Actor(res_mng, pipeline, col_scene) {
     if (velocity_[1]) {
       world_trans_[13] += velocity_[1];
     }
+
+    col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
+    if(true === col_scene.Sweep(col_shape_)) {
+      const shape_pos = col_shape_.GetData().pos;
+      world_trans_[12] = shape_pos.x;
+      world_trans_[13] = shape_pos.y;
+    }
   }
 
   function SetState_(key) {
@@ -164,7 +164,7 @@ function Actor(res_mng, pipeline, col_scene) {
   var accel_rate_ = 2;
   var acceleration_ = vec2.create();
   var velocity_ = vec2.create();
-  
+
   const MaxVelocity_ = 5;
   const BrakeDeceleration_ = 0.1;
   const Friction_ = 0.1;
