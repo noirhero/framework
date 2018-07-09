@@ -1,6 +1,8 @@
-'use strict';
+// Copyright 2018 TAP, Inc. All Rights Reserved.
 
 function Main() {
+  'use strict';
+
   let context = new Context();
   if(false === context.Initialize()) {
     alert('This browser does not support WebGL...');
@@ -14,7 +16,7 @@ function Main() {
 
   var world_transform = null;
   var actor = null;
-  for(var i = 0; i<2; ++i) {
+  for(var i = 0; i < 2; ++i) {
     actor = scene.ActorAssignment();
     actor.Initialize('data/animations/skeleton.json');
 
@@ -22,8 +24,9 @@ function Main() {
       actor.SetOwner(true);
     }
 
+    actor.SetTranslate(Math.RandomRanged(-300, 300), Math.RandomRanged(-100, 100));
+
     world_transform = actor.GetWorldTransform();
-  //  mat4.translate(world_transform, world_transform, [RandomRanged(-300, 300), RandomRanged(-100, 100), 0]);
     mat4.scale(world_transform, world_transform, [200, 100, 1]);
   }
 

@@ -1,16 +1,20 @@
-function Actor(res_mng, pipeline) {
+function Actor(res_mng, pipeline, col_scene) {
   'use strict';
+
+  let col_shape_ = null;
 
   /*
   public functions
   */
   this.Initialize = function(url) {
     instance_ = new Instance(res_mng.GetAnimation(url));
-    instance_.SetState('idle_l', RandomRanged(0, 1000));
+    instance_.SetState('idle_l', Math.RandomRanged(0, 1000));
     pipeline.AddInstance(instance_);
 
     input_ = new Input();
     input_.Initialize();
+
+    col_shape_ = col_scene.AssignmentBox(0, 0, 50, 50);
   };
 
   this.Update = function(dt) {
@@ -29,13 +33,21 @@ function Actor(res_mng, pipeline) {
     instance_ = null;
   };
 
+  this.SetTranslate = function(x, y) {
+    let world_transform = instance_.GetWorldTransform();
+    world_transform[12] = x;
+    world_transform[13] = y;
+
+    col_shape_.UpdateTranslate(x, y);
+  };
+
   this.GetWorldTransform = function() {
     return instance_.GetWorldTransform();
   };
 
   this.SetOwner = function(flag) {
     is_owner_ = flag;
-  }
+  };
 
   /*
   private functions
@@ -45,7 +57,7 @@ function Actor(res_mng, pipeline) {
     var input_enum_ = input_.input_enum;
 
     if(0 === vec2.len(input_direction_)) {
-      if(input_.IsDownKey(input_enum_.SpaceBar)) {
+      if(input_.IsDownKey(input_enum_.SpaceBar) || -1 !== instance_.GetState().indexOf('attack')) {
         SetState_('attack');
       }
       else {
@@ -95,6 +107,13 @@ function Actor(res_mng, pipeline) {
     if(vec2.len(velocity_) > MaxVelocity_) {
       vec2.normalize(velocity_, velocity_);
       vec2.scale(velocity_, velocity_, MaxVelocity_);
+    }
+
+    col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
+    if(true === col_scene.Sweep(col_shape_)) {
+      const shape_pos = col_shape_.GetData().pos;
+      world_trans_[12] = shape_pos.x;
+      world_trans_[13] = shape_pos.y;
     }
   }
 

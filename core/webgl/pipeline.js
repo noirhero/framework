@@ -1,93 +1,55 @@
-function Pipeline(gl) {
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
+WebGL.Pipeline = function(gl) {
   'use strict';
 
-  /*
-  public functions
-  */
-  this.Initialize = function() {
-    if (false === CreateShadersAndLinkProgram_()) {
-      return false;
-    }
+  WebGL.Resource.call(this, gl);
 
-    CreateVertexBuffer_();
-    CreateIndexBuffer_();
+  this.vs_ = null;
+  this.fs_ = null;
+  this.program_ = null;
 
-    return true;
-  };
+  this.a_world_pos_ = null;
+  this.a_texcoord_pos_ = null;
+  this.u_transform_vp_ = null;
+  this.u_albedo_ = null;
 
-  this.OnContextLost = function() {
-    // empty
-  };
+  this.transform_vp_ = mat4.create();
 
-  this.UpdateViewProjection = function(camera, projection) {
-    mat4.multiply(transform_vp_, projection.GetTransform(), camera.GetTransform());
-  };
+  this.vertices_ = null;
+  this.indices_ = null;
 
-  this.Run = function() {
-    var num_instances = instances_.length;
-    if(0 === num_instances) {
-      return;
-    }
+  this.vertex_buffer_ = null;
+  this.index_buffer_ = null;
 
-    gl.useProgram(program_);
+  this.instances_ = [];
+};
 
-    var fill_index = 0;
-    var instance = null;
-    var current_animation = null;
-    var prev_bind_animation = null;
+WebGL.Pipeline.prototype = Object.create(WebGL.Resource.prototype);
+WebGL.Pipeline.prototype.constructor = WebGL.Pipeline;
 
-    for(var i = 0; i < num_instances; ++i) {
-      instance = instances_[i];
-      current_animation = instance.GetAnimation();
+WebGL.Pipeline.prototype.Initialize = function() {
+  'use strict';
 
-      if(prev_bind_animation !== current_animation) {
-        if(false == current_animation.BindTexture(0, u_albedo_)) {
-          continue;
-        }
+  const gl = this.gl_;
 
-        prev_bind_animation = current_animation;
-      }
+  let vs_ = null;
+  let fs_ = null;
+  let program_ = null;
 
-      instance.FillVertices(fill_index * vertex_stride_, vertices_, quad_position_);
-      ++fill_index;
-    }
+  let vertex_buffer_ = null;
+  let vertices_ = null;
 
-    if(0 === fill_index) {
-      return;
-    }
+  let index_buffer_ = null;
+  let indices_ = null;
 
-    gl.uniformMatrix4fv(u_transform_vp_, false, transform_vp_);
+  let a_world_pos_ = null;
+  let a_texcoord_pos_ = null;
+  let u_transform_vp_ = null;
+  let u_albedo_ = null;
 
-    gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
-
-    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
-    gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
-
-    gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, vertex_stride_, 0);
-    gl.enableVertexAttribArray(a_world_pos_);
-    gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, vertex_stride_, 12);
-    gl.enableVertexAttribArray(a_texcoord_pos_);
-
-    gl.drawElements(gl.TRIANGLES, fill_index * index_stride_, gl.UNSIGNED_SHORT, 0);
-  };
-
-  this.AddInstance = function(instance) {
-    instances_[instances_.length] = instance;
-  };
-
-  this.RemoveInstance = function(instance) {
-    instances_ = instances_.filter(function(iter_instance) {
-      return iter_instance !== instance;
-    });
-  };
-
-
-
-  /*
-  private functions
-  */
   function CreateShader_(type, src) {
-    var shader = gl.createShader(type);
+    let shader = gl.createShader(type);
     gl.shaderSource(shader, src);
     gl.compileShader(shader);
 
@@ -113,7 +75,7 @@ function Pipeline(gl) {
       ' vTextureCoord = aTextureCoord;',
       '}',
     ].join('\n'));
-    if (null === vs_) {
+    if (!vs_) {
       return false;
     }
 
@@ -131,7 +93,7 @@ function Pipeline(gl) {
       ' }',
       '}',
     ].join('\n'));
-    if (null === fs_) {
+    if (!fs_) {
       return false;
     }
 
@@ -155,11 +117,21 @@ function Pipeline(gl) {
     return true;
   }
 
-  function CreateVertexBuffer_() {
-    for(var i = 0; i < num_index_; ++i) {
-      var offset = i * vertex_stride_;
+  function CreateBuffer_(target, src, usage) {
+    let buffer = gl.createBuffer();
+    gl.bindBuffer(target, buffer);
+    gl.bufferData(target, src, usage);
 
-      // x, y, z, tx, ty
+    return buffer;
+  }
+
+  function CreateVertexBuffer_() {
+    vertices_ = new Float32Array(CONST.NUM_MAX_INSTANCES * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV);
+
+    let offset = 0;
+    for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
+      offset = i * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+
       vertices_[offset] = -0.5;
       vertices_[offset + 1] = 0.5;
       vertices_[offset + 2] = 0.0;
@@ -188,9 +160,13 @@ function Pipeline(gl) {
   }
 
   function CreateIndexBuffer_() {
-    var offset_i = 0;
-    for(var i = 0; i < num_index_; ++i) {
-      var offset_v = i * quad_stride_;
+    indices_ = new Uint16Array(CONST.NUM_MAX_INSTANCES * CONST.INDEX_STRIDE_TWO_POLYGON);
+
+    let offset_i = 0;
+    let offset_v = 0;
+    for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
+      offset_v = i * CONST.QUAD_STRIDE;
+
       indices_[offset_i++] = offset_v;
       indices_[offset_i++] = offset_v + 1;
       indices_[offset_i++] = offset_v + 2;
@@ -201,46 +177,111 @@ function Pipeline(gl) {
     index_buffer_ = CreateBuffer_(gl.ELEMENT_ARRAY_BUFFER, indices_, gl.STATIC_DRAW);
   }
 
-  function CreateBuffer_(target, src, usage) {
-    var buffer = gl.createBuffer();
-    gl.bindBuffer(target, buffer);
-    gl.bufferData(target, src, usage);
-
-    return buffer;
+  if (false === CreateShadersAndLinkProgram_()) {
+    return false;
   }
 
+  CreateVertexBuffer_();
+  CreateIndexBuffer_();
 
+  this.vs_ = vs_;
+  this.fs_ = fs_;
+  this.program_ = program_;
 
-  /*
-  private variables
-  */
-  var program_ = null;
-  var vs_ = null;
-  var fs_ = null;
-  var a_world_pos_ = null;
-  var a_texcoord_pos_ = null;
-  var u_transform_vp_ = null;
-  var u_albedo_ = null;
+  this.a_world_pos_ = a_world_pos_;
+  this.a_texcoord_pos_ = a_texcoord_pos_;
+  this.u_transform_vp_ = u_transform_vp_;
+  this.u_albedo_ = u_albedo_;
 
-  var transform_vp_ = mat4.create();
+  this.vertices_ = vertices_;
+  this.indices_ = indices_;
 
-  var num_vertex_ = 100;
-  var vertex_stride_ = 20;
-  var vertices_ = new Float32Array(num_vertex_ * vertex_stride_);
+  this.vertex_buffer_ = vertex_buffer_;
+  this.index_buffer_ = index_buffer_;
 
-  var num_index_ = 100;
-  var index_stride_ = 6;
-  var quad_stride_ = 4;
-  var indices_ = new Uint16Array(num_index_ * index_stride_);
+  return true;
+};
 
-  var vertex_buffer_ = null;
-  var index_buffer_ = null;
+WebGL.Pipeline.prototype.UpdateViewProjection = function(camera, projection) {
+  'use strict';
 
-  var instances_ = [];
-  var quad_position_ = [
-    vec3.fromValues(-0.5, 0.5, 0.0),
-    vec3.fromValues(0.5, 0.5, 0.0),
-    vec3.fromValues(-0.5, -0.5, 0.0),
-    vec3.fromValues(0.5, -0.5, 0.0),
-  ];
-}
+  mat4.multiply(this.transform_vp_, projection.GetTransform(), camera.GetTransform());
+};
+
+WebGL.Pipeline.prototype.Run = function() {
+  const instances_ = this.instances_;
+  const num_instances = instances_.length;
+  if(0 === num_instances) {
+    return;
+  }
+
+  const vertex_stride = 20; // x, y, z, tu, tv
+  const index_stride = 6; // 2 polygon
+
+  const gl = this.gl_;
+
+  const a_world_pos_ = this.a_world_pos_;
+  const a_texcoord_pos_ = this.a_texcoord_pos_;
+  const u_albedo_ = this.u_albedo_;
+  const u_transform_vp_ = this.u_transform_vp_;
+  const vertices_ = this.vertices_;
+  const transform_vp_ = this.transform_vp_;
+
+  const vertex_buffer_ = this.vertex_buffer_;
+  const index_buffer_ = this.index_buffer_;
+
+  gl.useProgram(this.program_);
+
+  let fill_index = 0;
+  let instance = null;
+  let current_animation = null;
+  let prev_bind_animation = null;
+
+  for(let i = 0; i < num_instances; ++i) {
+    instance = instances_[i];
+    current_animation = instance.GetAnimation();
+
+    if(prev_bind_animation !== current_animation) {
+      if(false == current_animation.BindTexture(0, u_albedo_)) {
+        continue;
+      }
+
+      prev_bind_animation = current_animation;
+    }
+
+    instance.FillVertices(fill_index * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, vertices_, CONST.QUAD_POSITION);
+    ++fill_index;
+  }
+
+  if(0 === fill_index) {
+    return;
+  }
+
+  gl.uniformMatrix4fv(u_transform_vp_, false, transform_vp_);
+
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
+  gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+
+  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, vertex_stride, 0);
+  gl.enableVertexAttribArray(a_world_pos_);
+  gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, vertex_stride, 12);
+  gl.enableVertexAttribArray(a_texcoord_pos_);
+
+  gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
+};
+
+WebGL.Pipeline.prototype.AddInstance = function(instance) {
+  'use strict';
+
+  this.instances_[this.instances_.length] = instance;
+};
+
+WebGL.Pipeline.prototype.RemoveInstance = function(instance) {
+  'use strict';
+
+  this.instances_ = this.instances_.filter(function(iter_instance) {
+    return iter_instance !== instance;
+  });
+};
