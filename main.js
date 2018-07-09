@@ -1,7 +1,13 @@
-function Main() {
-  'use strict';
+'use strict';
 
-  var scene = new Scene();
+function Main() {
+  let context = new Context();
+  if(false === context.Initialize()) {
+    alert('This browser does not support WebGL...');
+    return;
+  }
+
+  let scene = new Scene(context);
   if(false === scene.Initialize()) {
     return;
   }
