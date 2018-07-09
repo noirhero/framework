@@ -31,7 +31,9 @@ function ResourceManager(context) {
   }
 
   function CreateAnimation_(url) {
-    return new Animation(url, this);
+    let animation = new WebGL.Animation(url, this);
+    animation.Initialize();
+    return animation;
   }
 
   function CreateResource_(url, res_array, create_fn) {
