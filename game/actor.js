@@ -138,12 +138,12 @@ function Actor(res_mng, pipeline, col_scene) {
       world_trans_[13] += velocity_[1];
     }
 
-    col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
-    if(true === col_scene.Sweep(col_shape_)) {
-      const shape_pos = col_shape_.GetData().pos;
-      world_trans_[12] = shape_pos.x;
-      world_trans_[13] = shape_pos.y;
-    }
+    // col_shape_.UpdateTranslate(world_trans_[12], world_trans_[13]);
+    // if(true === col_scene.Sweep(col_shape_)) {
+    //   const shape_pos = col_shape_.GetData().pos;
+    //   world_trans_[12] = shape_pos.x;
+    //   world_trans_[13] = shape_pos.y;
+    // }
   }
 
   function SetState_(key) {

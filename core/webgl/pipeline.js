@@ -10,9 +10,9 @@ WebGL.Pipeline = function(gl) {
   this.program_ = null;
 
   this.a_world_pos_ = null;
-  this.a_texcoord_pos_ = null;
-  this.u_transform_vp_ = null;
-  this.u_albedo_ = null;
+  this.a_tex_coord_ = null;
+  this.u_vp_transform_ = null;
+  this.s_sprite_ = null;
 
   this.transform_vp_ = mat4.create();
 
@@ -49,16 +49,16 @@ WebGL.Pipeline.prototype.CreateVertexShader = function() {
   'use strict';
 
   const src = [
-    'attribute vec3 aWorldPos;',
-    'attribute vec2 aTextureCoord;',
+    'attribute vec3 world_pos;',
+    'attribute vec2 tex_coord;',
 
-    'uniform mat4 uViewProjectionTransform;',
+    'uniform mat4 vp_transform;',
 
-    'varying vec2 vTextureCoord;',
+    'varying vec2 out_tex_coord;',
 
     'void main() {',
-    ' gl_Position = uViewProjectionTransform * vec4(aWorldPos, 1.0);',
-    ' vTextureCoord = aTextureCoord;',
+    ' gl_Position = vp_transform * vec4(world_pos, 1.0);',
+    ' out_tex_coord = tex_coord;',
     '}',
   ].join('\n');
 
@@ -69,14 +69,14 @@ WebGL.Pipeline.prototype.CreateFragmentShader = function() {
   'use strict';
 
   const src = [
-    'precision mediump float;',
+    'precision lowp float;',
 
-    'uniform sampler2D uAlbedo;',
+    'uniform sampler2D sampler_sprite;',
 
-    'varying vec2 vTextureCoord;',
+    'varying vec2 out_tex_coord;',
 
     'void main() {',
-    ' gl_FragColor = texture2D(uAlbedo, vTextureCoord);',
+    ' gl_FragColor = texture2D(sampler_sprite, out_tex_coord);',
     ' if(0.0 == gl_FragColor.a) {',
     '   discard;',
     ' }',
@@ -119,11 +119,14 @@ WebGL.Pipeline.prototype.CreateBuffer = function(target, src, usage) {
 WebGL.Pipeline.prototype.FillVertices = function() {
   'use strict';
 
-  let vertices = new Float32Array(CONST.NUM_MAX_INSTANCES * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV);
+  const max_instance = CONST.NUM_MAX_INSTANCES;
+  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+
+  let vertices = new Float32Array(max_instance * stride);
 
   let offset = 0;
-  for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
-    offset = i * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+  for(var i = 0; i < max_instance; ++i) {
+    offset = i * stride;
 
     vertices[offset] = -0.5;
     vertices[offset + 1] = 0.5;
@@ -162,12 +165,15 @@ WebGL.Pipeline.prototype.CreateVertexBuffer = function(src) {
 WebGL.Pipeline.prototype.FillIndices = function() {
   'use strict';
 
-  let indices = new Uint16Array(CONST.NUM_MAX_INSTANCES * CONST.INDEX_STRIDE_TWO_POLYGON);
+  const max_instance = CONST.NUM_MAX_INSTANCES;
+  const stride = CONST.QUAD_STRIDE;
+
+  let indices = new Uint16Array(max_instance * CONST.INDEX_STRIDE_TWO_POLYGON);
 
   let offset_i = 0;
   let offset_v = 0;
-  for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
-    offset_v = i * CONST.QUAD_STRIDE;
+  for(var i = 0; i < max_instance; ++i) {
+    offset_v = i * stride;
 
     indices[offset_i++] = offset_v;
     indices[offset_i++] = offset_v + 1;
@@ -178,7 +184,6 @@ WebGL.Pipeline.prototype.FillIndices = function() {
   }
 
   return indices;
-
 };
 
 WebGL.Pipeline.prototype.CreateIndexBuffer = function(src) {
@@ -195,7 +200,9 @@ WebGL.Pipeline.prototype.Initialize = function() {
   gl.enable(gl.DEPTH_TEST);
   gl.depthFunc(gl.GREATER);
 
-  gl.disable(gl.CULL_FACE);  gl.frontFace(gl.CW);  gl.enable(gl.BLEND);
+  gl.disable(gl.CULL_FACE);
+  gl.frontFace(gl.CW);
+  gl.enable(gl.BLEND);
   gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
   gl.clearColor(0.25, 0.25, 0.75, 1);
@@ -212,10 +219,10 @@ WebGL.Pipeline.prototype.Initialize = function() {
   this.fs_ = fs;
   this.program_ = program;
 
-  this.a_world_pos_ = gl.getAttribLocation(program, 'aWorldPos');
-  this.a_texcoord_pos_ = gl.getAttribLocation(program, 'aTextureCoord');
-  this.u_transform_vp_ = gl.getUniformLocation(program, 'uViewProjectionTransform');
-  this.u_albedo_ = gl.getUniformLocation(program, 'uAlbedo');
+  this.a_world_pos_ = gl.getAttribLocation(program, 'world_pos');
+  this.a_tex_coord_ = gl.getAttribLocation(program, 'tex_coord');
+  this.u_vp_transform_ = gl.getUniformLocation(program, 'vp_transform');
+  this.s_sprite_ = gl.getUniformLocation(program, 'sampler_sprite');
 
   if(!this.vertices_) {
     this.vertices_ = this.FillVertices();
@@ -258,9 +265,9 @@ WebGL.Pipeline.prototype.Run = function() {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   const a_world_pos_ = this.a_world_pos_;
-  const a_texcoord_pos_ = this.a_texcoord_pos_;
-  const u_albedo_ = this.u_albedo_;
-  const u_transform_vp_ = this.u_transform_vp_;
+  const a_tex_coord_ = this.a_tex_coord_;
+  const s_sprite_ = this.s_sprite_;
+  const u_vp_transform_ = this.u_vp_transform_;
   const vertices_ = this.vertices_;
   const transform_vp_ = this.transform_vp_;
 
@@ -274,19 +281,22 @@ WebGL.Pipeline.prototype.Run = function() {
   let current_animation = null;
   let prev_bind_animation = null;
 
+  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+  const quad_position = CONST.QUAD_POSITION;
+
   for(let i = 0; i < num_instances; ++i) {
     instance = instances_[i];
     current_animation = instance.GetAnimation();
 
     if(prev_bind_animation !== current_animation) {
-      if(false == current_animation.BindTexture(0, u_albedo_)) {
+      if(false == current_animation.BindTexture(0, s_sprite_)) {
         continue;
       }
 
       prev_bind_animation = current_animation;
     }
 
-    instance.FillVertices(fill_index * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, vertices_, CONST.QUAD_POSITION);
+    instance.FillVertices(fill_index * stride, vertices_, quad_position);
     ++fill_index;
   }
 
@@ -294,17 +304,17 @@ WebGL.Pipeline.prototype.Run = function() {
     return;
   }
 
-  gl.uniformMatrix4fv(u_transform_vp_, false, transform_vp_);
+  gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
 
   gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
 
-  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, 0);
+  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, stride, 0);
   gl.enableVertexAttribArray(a_world_pos_);
-  gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, 12);
-  gl.enableVertexAttribArray(a_texcoord_pos_);
+  gl.vertexAttribPointer(a_tex_coord_, 2, gl.FLOAT, false, stride, 12);
+  gl.enableVertexAttribArray(a_tex_coord_);
 
   gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
 };

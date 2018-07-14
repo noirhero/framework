@@ -24,6 +24,8 @@ function Scene(context) {
   function Update_() {
     timer_.Update();
 
+    console.log(`FPS : ${timer_.GetFPS()}`);
+
     projection_.Update();
     pipeline_.UpdateViewProjection(camera_, projection_);
 

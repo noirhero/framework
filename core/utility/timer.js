@@ -23,7 +23,7 @@ function Timer() {
     old_ = now_;
 
     second_ += delta_;
-    if(1000.0 <= second_) {
+    if(1 <= second_) {
       fps_ = frame_ + 1;
       frame_ = 0;
       second_ -= 1000.0;

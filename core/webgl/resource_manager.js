@@ -3,9 +3,47 @@
 function ResourceManager(context) {
   'use strict';
 
-  /*
-  public functions
-  */
+  let textures_ = {};
+  let animations_ = {};
+
+  function CreateResource_(url, res_array, create_fn) {
+    let resource = res_array[url];
+    if(!resource) {
+      resource = {
+        data: create_fn(),
+        ref_count: 0,
+      };
+
+      res_array[url] = resource;
+    }
+
+    ++resource.ref_count;
+    return resource.data;
+  }
+
+  function DeleteResource_(data, res_array) {
+    const url = data.GetSrc();
+    let resource = res_array[url];
+    if(!resource) {
+      return;
+    }
+
+    --resource.ref_count;
+    if(0 >= resource.ref_count) {
+      delete res_array[url];
+    }
+  }
+
+  function CreateTexture_(url) {
+    return context.CreateTexture(url);
+  }
+
+  function CreateAnimation_(url) {
+    let animation = new WebGL.Animation(url, this);
+    animation.Initialize();
+    return animation;
+  }
+
   this.GetTexture = function(url) {
     return CreateResource_(url, textures_, CreateTexture_.bind(this, url));
   };
@@ -22,55 +60,4 @@ function ResourceManager(context) {
     DeleteResource_(animation.GetTextureSrc(), textures_);
     DeleteResource_(animation, animations_);
   };
-
-
-
-  /*
-  private functions
-  */
-  function CreateTexture_(url) {
-    return context.CreateTexture(url);
-  }
-
-  function CreateAnimation_(url) {
-    let animation = new WebGL.Animation(url, this);
-    animation.Initialize();
-    return animation;
-  }
-
-  function CreateResource_(url, res_array, create_fn) {
-    var resource = res_array[url];
-    if(!resource) {
-      resource = {
-        'data': create_fn(),
-        'ref_count': 0,
-      };
-
-      res_array[url] = resource;
-    }
-
-    ++resource.ref_count;
-    return resource.data;
-  }
-
-  function DeleteResource_(data, res_array) {
-    var url = data.GetSrc();
-    var resource = res_array[url];
-    if(!resource) {
-      return;
-    }
-
-    --resource.ref_count;
-    if(0 >= resource.ref_count) {
-      delete res_array[url];
-    }
-  }
-
-
-
-  /*
-  private variables
-  */
-  var textures_ = {};
-  var animations_ = {};
 }
