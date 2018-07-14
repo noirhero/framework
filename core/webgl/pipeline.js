@@ -28,182 +28,220 @@ WebGL.Pipeline = function(gl) {
 WebGL.Pipeline.prototype = Object.create(WebGL.Resource.prototype);
 WebGL.Pipeline.prototype.constructor = WebGL.Pipeline;
 
+WebGL.Pipeline.prototype.CreateShader = function(type, src) {
+  'use strict';
+
+  const gl = this.gl_;
+
+  let shader = gl.createShader(type);
+  gl.shaderSource(shader, src);
+  gl.compileShader(shader);
+
+  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    alert('Compile shader failed.\n' + src + '\n');
+    shader = null;
+  }
+
+  return shader;
+};
+
+WebGL.Pipeline.prototype.CreateVertexShader = function() {
+  'use strict';
+
+  const src = [
+    'attribute vec3 aWorldPos;',
+    'attribute vec2 aTextureCoord;',
+
+    'uniform mat4 uViewProjectionTransform;',
+
+    'varying vec2 vTextureCoord;',
+
+    'void main() {',
+    ' gl_Position = uViewProjectionTransform * vec4(aWorldPos, 1.0);',
+    ' vTextureCoord = aTextureCoord;',
+    '}',
+  ].join('\n');
+
+  return this.CreateShader(this.gl_.VERTEX_SHADER, src);
+};
+
+WebGL.Pipeline.prototype.CreateFragmentShader = function() {
+  'use strict';
+
+  const src = [
+    'precision mediump float;',
+
+    'uniform sampler2D uAlbedo;',
+
+    'varying vec2 vTextureCoord;',
+
+    'void main() {',
+    ' gl_FragColor = texture2D(uAlbedo, vTextureCoord);',
+    ' if(0.0 == gl_FragColor.a) {',
+    '   discard;',
+    ' }',
+    '}',
+  ].join('\n');
+
+  return this.CreateShader(this.gl_.FRAGMENT_SHADER, src);
+};
+
+WebGL.Pipeline.prototype.CreateProgram = function(vs, fs)
+{
+  'use strict';
+
+  const gl = this.gl_;
+
+  let program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    alert('Prgram link failed.');
+    program = null;
+  }
+
+  return program;
+};
+
+WebGL.Pipeline.prototype.CreateBuffer = function(target, src, usage) {
+  'use strict';
+
+  const gl = this.gl_;
+
+  let buffer = gl.createBuffer();
+  gl.bindBuffer(target, buffer);
+  gl.bufferData(target, src, usage);
+
+  return buffer;
+};
+
+WebGL.Pipeline.prototype.FillVertices = function() {
+  'use strict';
+
+  let vertices = new Float32Array(CONST.NUM_MAX_INSTANCES * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV);
+
+  let offset = 0;
+  for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
+    offset = i * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+
+    vertices[offset] = -0.5;
+    vertices[offset + 1] = 0.5;
+    vertices[offset + 2] = 0.0;
+    vertices[offset + 3] = 0.0;
+    vertices[offset + 4] = 1.0;
+
+    vertices[offset + 5] = 0.5;
+    vertices[offset + 6] = 0.5;
+    vertices[offset + 7] = 0.0;
+    vertices[offset + 8] = 1.0;
+    vertices[offset + 9] = 1.0;
+
+    vertices[offset + 10] = -0.5;
+    vertices[offset + 11] = -0.5;
+    vertices[offset + 12] = 0.0;
+    vertices[offset + 13] = 0.0;
+    vertices[offset + 14] = 0.0;
+
+    vertices[offset + 15] = 0.5;
+    vertices[offset + 16] = -0.5;
+    vertices[offset + 17] = 0.0;
+    vertices[offset + 18] = 1.0;
+    vertices[offset + 19] = 0.0;
+  }
+
+  return vertices;
+};
+
+WebGL.Pipeline.prototype.CreateVertexBuffer = function(src) {
+  'use strict';
+
+  return this.CreateBuffer(this.gl_.ARRAY_BUFFER, src, this.gl_.DYNAMIC_DRAW);
+};
+
+WebGL.Pipeline.prototype.FillIndices = function() {
+  'use strict';
+
+  let indices = new Uint16Array(CONST.NUM_MAX_INSTANCES * CONST.INDEX_STRIDE_TWO_POLYGON);
+
+  let offset_i = 0;
+  let offset_v = 0;
+  for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
+    offset_v = i * CONST.QUAD_STRIDE;
+
+    indices[offset_i++] = offset_v;
+    indices[offset_i++] = offset_v + 1;
+    indices[offset_i++] = offset_v + 2;
+    indices[offset_i++] = offset_v + 2;
+    indices[offset_i++] = offset_v + 1;
+    indices[offset_i++] = offset_v + 3;
+  }
+
+  return indices;
+
+};
+
+WebGL.Pipeline.prototype.CreateIndexBuffer = function(src) {
+  'use strict';
+
+  return this.CreateBuffer(this.gl_.ELEMENT_ARRAY_BUFFER, src, this.gl_.STATIC_DRAW);
+};
+
 WebGL.Pipeline.prototype.Initialize = function() {
   'use strict';
 
   const gl = this.gl_;
 
-  let vs_ = null;
-  let fs_ = null;
-  let program_ = null;
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.GREATER);
 
-  let vertex_buffer_ = null;
-  let vertices_ = null;
+  gl.disable(gl.CULL_FACE);  gl.frontFace(gl.CW);  gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
 
-  let index_buffer_ = null;
-  let indices_ = null;
+  gl.clearColor(0.25, 0.25, 0.75, 1);
+  gl.clearDepth(0);
 
-  let a_world_pos_ = null;
-  let a_texcoord_pos_ = null;
-  let u_transform_vp_ = null;
-  let u_albedo_ = null;
-
-  function CreateShader_(type, src) {
-    let shader = gl.createShader(type);
-    gl.shaderSource(shader, src);
-    gl.compileShader(shader);
-
-    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-      alert('Compile shader failed.\n' + src + '\n');
-      shader = null;
-    }
-
-    return shader;
-  }
-
-  function CreateShadersAndLinkProgram_() {
-    vs_ = CreateShader_(gl.VERTEX_SHADER, [
-      'attribute vec3 aWorldPos;',
-      'attribute vec2 aTextureCoord;',
-
-      'uniform mat4 uViewProjectionTransform;',
-
-      'varying vec2 vTextureCoord;',
-
-      'void main() {',
-      ' gl_Position = uViewProjectionTransform * vec4(aWorldPos, 1.0);',
-      ' vTextureCoord = aTextureCoord;',
-      '}',
-    ].join('\n'));
-    if (!vs_) {
-      return false;
-    }
-
-    fs_ = CreateShader_(gl.FRAGMENT_SHADER, [
-      'precision mediump float;',
-
-      'uniform sampler2D uAlbedo;',
-
-      'varying vec2 vTextureCoord;',
-
-      'void main() {',
-      ' gl_FragColor = texture2D(uAlbedo, vTextureCoord);',
-      ' if(0.0 == gl_FragColor.a) {',
-      '   discard;',
-      ' }',
-      '}',
-    ].join('\n'));
-    if (!fs_) {
-      return false;
-    }
-
-    program_ = gl.createProgram();
-    gl.attachShader(program_, vs_);
-    gl.attachShader(program_, fs_);
-    gl.linkProgram(program_);
-    if (!gl.getProgramParameter(program_, gl.LINK_STATUS)) {
-      alert('Prgram link failed.');
-      vs_ = null;
-      fs_ = null;
-      program_ = null;
-      return false;
-    }
-
-    a_world_pos_ = gl.getAttribLocation(program_, 'aWorldPos');
-    a_texcoord_pos_ = gl.getAttribLocation(program_, 'aTextureCoord');
-    u_transform_vp_ = gl.getUniformLocation(program_, 'uViewProjectionTransform');
-    u_albedo_ = gl.getUniformLocation(program_, 'uAlbedo');
-
-    return true;
-  }
-
-  function CreateBuffer_(target, src, usage) {
-    let buffer = gl.createBuffer();
-    gl.bindBuffer(target, buffer);
-    gl.bufferData(target, src, usage);
-
-    return buffer;
-  }
-
-  function CreateVertexBuffer_() {
-    vertices_ = new Float32Array(CONST.NUM_MAX_INSTANCES * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV);
-
-    let offset = 0;
-    for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
-      offset = i * CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
-
-      vertices_[offset] = -0.5;
-      vertices_[offset + 1] = 0.5;
-      vertices_[offset + 2] = 0.0;
-      vertices_[offset + 3] = 0.0;
-      vertices_[offset + 4] = 1.0;
-
-      vertices_[offset + 5] = 0.5;
-      vertices_[offset + 6] = 0.5;
-      vertices_[offset + 7] = 0.0;
-      vertices_[offset + 8] = 1.0;
-      vertices_[offset + 9] = 1.0;
-
-      vertices_[offset + 10] = -0.5;
-      vertices_[offset + 11] = -0.5;
-      vertices_[offset + 12] = 0.0;
-      vertices_[offset + 13] = 0.0;
-      vertices_[offset + 14] = 0.0;
-
-      vertices_[offset + 15] = 0.5;
-      vertices_[offset + 16] = -0.5;
-      vertices_[offset + 17] = 0.0;
-      vertices_[offset + 18] = 1.0;
-      vertices_[offset + 19] = 0.0;
-    }
-    vertex_buffer_ = CreateBuffer_(gl.ARRAY_BUFFER, vertices_, gl.DYNAMIC_DRAW);
-  }
-
-  function CreateIndexBuffer_() {
-    indices_ = new Uint16Array(CONST.NUM_MAX_INSTANCES * CONST.INDEX_STRIDE_TWO_POLYGON);
-
-    let offset_i = 0;
-    let offset_v = 0;
-    for(var i = 0; i < CONST.NUM_MAX_INSTANCES; ++i) {
-      offset_v = i * CONST.QUAD_STRIDE;
-
-      indices_[offset_i++] = offset_v;
-      indices_[offset_i++] = offset_v + 1;
-      indices_[offset_i++] = offset_v + 2;
-      indices_[offset_i++] = offset_v + 2;
-      indices_[offset_i++] = offset_v + 1;
-      indices_[offset_i++] = offset_v + 3;
-    }
-    index_buffer_ = CreateBuffer_(gl.ELEMENT_ARRAY_BUFFER, indices_, gl.STATIC_DRAW);
-  }
-
-  if (false === CreateShadersAndLinkProgram_()) {
+  let vs = this.CreateVertexShader();
+  let fs = this.CreateFragmentShader();
+  let program = this.CreateProgram(vs, fs);
+  if(!program) {
     return false;
   }
 
-  CreateVertexBuffer_();
-  CreateIndexBuffer_();
+  this.vs_ = vs;
+  this.fs_ = fs;
+  this.program_ = program;
 
-  this.vs_ = vs_;
-  this.fs_ = fs_;
-  this.program_ = program_;
+  this.a_world_pos_ = gl.getAttribLocation(program, 'aWorldPos');
+  this.a_texcoord_pos_ = gl.getAttribLocation(program, 'aTextureCoord');
+  this.u_transform_vp_ = gl.getUniformLocation(program, 'uViewProjectionTransform');
+  this.u_albedo_ = gl.getUniformLocation(program, 'uAlbedo');
 
-  this.a_world_pos_ = a_world_pos_;
-  this.a_texcoord_pos_ = a_texcoord_pos_;
-  this.u_transform_vp_ = u_transform_vp_;
-  this.u_albedo_ = u_albedo_;
+  if(!this.vertices_) {
+    this.vertices_ = this.FillVertices();
+  }
+  if(!this.indices_) {
+    this.indices_ = this.FillIndices();
+  }
 
-  this.vertices_ = vertices_;
-  this.indices_ = indices_;
+  this.vertex_buffer_ = this.CreateVertexBuffer(this.vertices_);
+  if(!this.vertex_buffer_) {
+    return false;
+  }
 
-  this.vertex_buffer_ = vertex_buffer_;
-  this.index_buffer_ = index_buffer_;
+  this.index_buffer_ = this.CreateIndexBuffer(this.indices_);
+  if(!this.index_buffer_) {
+    return false;
+  }
 
   return true;
 };
 
 WebGL.Pipeline.prototype.UpdateViewProjection = function(camera, projection) {
   'use strict';
+
+  const frustum = projection.GetFrustum();
+  this.gl_.viewport(frustum.x, frustum.y, frustum.width, frustum.height);
 
   mat4.multiply(this.transform_vp_, projection.GetTransform(), camera.GetTransform());
 };
@@ -215,10 +253,9 @@ WebGL.Pipeline.prototype.Run = function() {
     return;
   }
 
-  const vertex_stride = 20; // x, y, z, tu, tv
-  const index_stride = 6; // 2 polygon
-
   const gl = this.gl_;
+
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   const a_world_pos_ = this.a_world_pos_;
   const a_texcoord_pos_ = this.a_texcoord_pos_;
@@ -264,9 +301,9 @@ WebGL.Pipeline.prototype.Run = function() {
   gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
   gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
 
-  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, vertex_stride, 0);
+  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, 0);
   gl.enableVertexAttribArray(a_world_pos_);
-  gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, vertex_stride, 12);
+  gl.vertexAttribPointer(a_texcoord_pos_, 2, gl.FLOAT, false, CONST.VERTEX_STRIDE_X_Y_Z_TU_TV, 12);
   gl.enableVertexAttribArray(a_texcoord_pos_);
 
   gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
@@ -274,7 +311,6 @@ WebGL.Pipeline.prototype.Run = function() {
 
 WebGL.Pipeline.prototype.AddInstance = function(instance) {
   'use strict';
-
   this.instances_[this.instances_.length] = instance;
 };
 

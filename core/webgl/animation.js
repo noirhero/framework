@@ -3,8 +3,6 @@
 WebGL.Animation = function(url, res_mng) {
   'use strict';
 
-  // WebGL.Resource.call(this); // Not needed!
-
   this.url_ = url;
   this.frame_infos_ = null;
 

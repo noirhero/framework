@@ -24,7 +24,7 @@ function Scene(context) {
   function Update_() {
     timer_.Update();
 
-    projection_.SetFrustum(context.GetFrustum());
+    projection_.Update();
     pipeline_.UpdateViewProjection(camera_, projection_);
 
     Updateactors_(timer_.GetDelta());

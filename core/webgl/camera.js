@@ -4,7 +4,9 @@ function Camera() {
   'use strict';
 
   let dirty_ = false;
+
   let view_transform_ = mat4.create();
+
   let pos_ = vec3.create();
   let dir_ = vec3.fromValues(0.0, 0.0, -1.0);
   let up_ = vec3.fromValues(0.0, 1.0, 0.0);
