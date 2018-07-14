@@ -3,18 +3,23 @@
 function Instance(animation) {
   'use strict';
 
-  /*
-  public functions
-  */
+  let world_transform_ = mat4.create();
+  let world_position_ = vec3.create();
+
+  let state_ = {
+    state: null,
+    duration: 0,
+  };
+
   this.Update = function(dt) {
-    state_.duration += dt;
+    state_.duration += dt * 1000;
   };
 
   this.FillVertices = function(offset, dest_vertices, quad_position) {
-    var current_texcoord = animation.GetTextureCoordinate(state_);
+    const current_texcoord = animation.GetTextureCoordinate(state_);
 
-    var texcoord_offset = 0;
-    for(var i = 0; i < 4; ++i) {
+    let texcoord_offset = 0;
+    for(let i = 0; i < 4; ++i) {
       vec3.transformMat4(world_position_, quad_position[i], world_transform_);
 
       dest_vertices[offset++] = world_position_[0];
@@ -44,24 +49,5 @@ function Instance(animation) {
 
   this.GetAnimation = function() {
     return animation;
-  };
-
-
-
-  /*
-  private functions
-  */
-
-
-
-  /*
-  private variables
-  */
-  var world_transform_ = mat4.create();
-  var world_position_ = vec3.create();
-
-  var state_ = {
-    'state': null,
-    'duration': 0,
   };
 }

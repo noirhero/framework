@@ -3,21 +3,7 @@
 function ReadFile(url, callback) {
   'use strict';
 
-  /*
-  public functions
-  */
-
-
-
-  /*
-  private functions
-  */
-  function Run_() {
-    http_request_ = new XMLHttpRequest();
-    http_request_.open('GET', url, true);
-    http_request_.onreadystatechange = StateChange_;
-    http_request_.send(null);
-  }
+  let http_request_ = null;
 
   function StateChange_() {
     if(4 === http_request_.readyState) {
@@ -28,17 +14,8 @@ function ReadFile(url, callback) {
     }
   }
 
-
-
-  /*
-  private variables
-  */
-  var http_request_ = null;
-
-
-
-  /*
-  process
-  */
-  Run_();
+  http_request_ = new XMLHttpRequest();
+  http_request_.open('GET', url, true);
+  http_request_.onreadystatechange = StateChange_;
+  http_request_.send(null);
 }

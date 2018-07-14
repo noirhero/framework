@@ -1,6 +1,8 @@
-'use strict';
+// Copyright 2018 TAP, Inc. All Rights Reserved.
 
 function Scene(context) {
+  'use strict';
+
   let res_mng_ = null;
   let timer_ = null;
 
@@ -12,9 +14,24 @@ function Scene(context) {
 
   let col_scene_ = null;
 
-  /*
-  public functions
-  */
+  function Updateactors_(dt) {
+    let num_objects = actors_.length;
+    for(let i = 0; i < num_objects; ++i) {
+      actors_[i].Update(dt);
+    }
+  }
+
+  function Update_() {
+    timer_.Update();
+
+    projection_.SetFrustum(context.GetFrustum());
+    pipeline_.UpdateViewProjection(camera_, projection_);
+
+    Updateactors_(timer_.GetDelta());
+
+    pipeline_.Run();
+  }
+
   this.Initialize = function() {
     context.SetTickFunction(Update_);
 
@@ -43,31 +60,9 @@ function Scene(context) {
 
   this.ActorRelease = function(actor) {
     actor.Release();
+
     actors_ = actors_.filter(function(iter_actor) {
       return actor !== iter_actor;
     });
   };
-
-
-
-  /*
-  private functions
-  */
-  function Update_() {
-    timer_.Update();
-
-    projection_.SetFrustum(context.GetFrustum());
-    pipeline_.UpdateViewProjection(camera_, projection_);
-
-    Updateactors_(timer_.GetDelta());
-
-    pipeline_.Run();
-  }
-
-  function Updateactors_(dt) {
-    var num_objects = actors_.length;
-    for(var i = 0; i < num_objects; ++i) {
-      actors_[i].Update(dt);
-    }
-  }
 }

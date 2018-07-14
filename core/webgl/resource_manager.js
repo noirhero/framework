@@ -1,3 +1,5 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
 function ResourceManager(context) {
   'use strict';
 

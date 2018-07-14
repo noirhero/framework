@@ -1,3 +1,5 @@
+// Copyright 2018 TAP, Inc. All Rights Reserved.
+
 function Actor(res_mng, pipeline, col_scene) {
   'use strict';
 
@@ -90,7 +92,7 @@ function Actor(res_mng, pipeline, col_scene) {
       vec2.normalize(accel_dir_, acceleration_);
       vec2.scale(accel_dir_, accel_dir_, velocity_len_);
 
-      var adjusted_friction_ = Math.min(dt * 0.001 * Friction_, 1);
+      var adjusted_friction_ = Math.min(dt * Friction_, 1);
       var temp_velo_ = vec2.create();
 
       // velocity_ = velocity_ - ((velocity_ - accel_dir_) * adjusted_friction_)
@@ -100,7 +102,7 @@ function Actor(res_mng, pipeline, col_scene) {
     }
 
     // velocity_ += acceleration_ * dt
-    vec2.scale(acceleration_, acceleration_, dt * 0.001);
+    vec2.scale(acceleration_, acceleration_, dt);
     vec2.add(velocity_, velocity_, acceleration_);
 
     // clamp velocity
@@ -116,8 +118,8 @@ function Actor(res_mng, pipeline, col_scene) {
     var reverse_accel_ = vec2.create();
     vec2.normalize(reverse_accel_, velocity_);
 
-    reverse_accel_[0] = BrakeDeceleration_ * -reverse_accel_[0] * dt * 0.001;
-    reverse_accel_[1] = BrakeDeceleration_ * -reverse_accel_[1] * dt * 0.001;
+    reverse_accel_[0] = BrakeDeceleration_ * -reverse_accel_[0] * dt;
+    reverse_accel_[1] = BrakeDeceleration_ * -reverse_accel_[1] * dt;
 
     velocity_[0] = velocity_[0] + ((-Friction_) * velocity_[0] + reverse_accel_[0]);
     velocity_[1] = velocity_[1] + ((-Friction_) * velocity_[1] + reverse_accel_[1]);

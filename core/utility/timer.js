@@ -3,17 +3,23 @@
 function Timer() {
   'use strict';
 
-  /*
-  public functions
-  */
+  let old_ = 0;
+  let now_ = 0;
+  let delta_ = 0;
+  let delta_ms_ = 0;
+
+  let second_ = 0;
+  let frame_ = 0;
+  let fps_ = 0;
+
   this.Start = function() {
     old_ = now_ = Date.now();
   };
 
   this.Update = function() {
     now_ = Date.now();
-    delta_ = now_ - old_;
-    delta_ms_ = delta_ * 0.001;
+    delta_ms_ = now_ - old_;
+    delta_ = delta_ms_ * 0.001;
     old_ = now_;
 
     second_ += delta_;
@@ -38,18 +44,4 @@ function Timer() {
   this.GetFPS = function() {
     return fps_;
   };
-
-
-
-  /*
-  private variables
-  */
-  var old_ = 0;
-  var now_ = 0;
-  var delta_ = 0;
-  var delta_ms_ = 0;
-
-  var second_ = 0;
-  var frame_ = 0;
-  var fps_ = 0;
 }
