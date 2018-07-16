@@ -7,8 +7,15 @@ function Input() {
   public functions
   */
   this.Initialize = function() {
+    // keyboard
     document.addEventListener('keydown', Keydown_, false);
     document.addEventListener('keyup', Keyup_, false);
+
+    // touch
+    document.addEventListener("touchstart", TouchStart_, false);
+    document.addEventListener("touchend", TouchEnd_, false);
+    document.addEventListener("touchcancel", TouchCancel_, false);
+    document.addEventListener("touchmove", TouchMove_, false);
   }
 
   this.IsDownKey = function(key) {
@@ -69,11 +76,58 @@ function Input() {
     }
   }
 
+  function TouchStart_(event){
+        
+    console.log("touchstart.");
+
+    for(let i=0; i<input_touch_stack.length; i++) {      
+     console.log(`${input_touch_stack[i].x}, ${input_touch_stack[i].y}`);
+    }
+  }
+
+  function TouchEnd_(event){
+
+    console.log("touchend.");
+
+    for(let i=0; i<input_touch_stack.length; i++) {      
+      console.log(`${input_touch_stack[i].x}, ${input_touch_stack[i].y}`);
+    }
+    //input_touch_stack.length = 0;
+  }
+
+  function TouchCancel_(event){
+
+    console.log("touchcancel.");
+  }
+
+  function TouchMove_(event){
+    
+    let cached_touches = event.changedTouches;
+   // console.log(`${input_touch_stack.length}`);
+    let cached_length = 0;//input_touch_stack.length;
+
+    for(let i=0; i<cached_touches.length; i++) {
+      let index = cached_length + i;
+
+      input_touch_stack[index] = {
+        x : cached_touches[i].screenX,
+        y : cached_touches[i].screenY,
+      };
+      
+      //console.log(`${input_touch_stack[index].x}, ${input_touch_stack[index].y}`);
+    }
+
+    for(let i=0; i<input_touch_stack.length; i++) {      
+      console.log(`${input_touch_stack[i].x}, ${input_touch_stack[i].y}`);
+    }
+  }
+
   /*
   private variables
   */
   var input_state_ = 0;
   var input_direction_ = vec2.create();
+  var input_touch_stack = {};
   const input_enum_ = {KeyLeft: 1, KeyRight: 2, KeyUp: 4, KeyDown: 8, SpaceBar: 16};
 
   this.input_enum = input_enum_;
