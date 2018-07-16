@@ -16,7 +16,7 @@ function Main() {
 
   let world_transform = null;
   let actor = null;
-  for(let i = 0; i < 1000; ++i) {
+  for(let i = 0; i < 1; ++i) {
     actor = scene.ActorAssignment();
     actor.Initialize('data/animations/skeleton.json');
 
@@ -24,7 +24,7 @@ function Main() {
       actor.SetOwner(true);
     }
 
-    actor.SetTranslate(Math.RandomRanged(-500, 500), Math.RandomRanged(-200, 200));
+    //actor.SetTranslate(Math.RandomRanged(-500, 500), Math.RandomRanged(-200, 200));
 
     world_transform = actor.GetWorldTransform();
     mat4.scale(world_transform, world_transform, [200, 100, 1]);

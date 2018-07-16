@@ -10,6 +10,7 @@ function Scene(context) {
   let projection_ = null;
 
   let pipeline_ = null;
+  let debug_drawer_ = null;
   let actors_ = [];
 
   let col_scene_ = null;
@@ -28,10 +29,12 @@ function Scene(context) {
 
     projection_.Update();
     pipeline_.UpdateViewProjection(camera_, projection_);
+    debug_drawer_.UpdateViewProjection(camera_, projection_);
 
     Updateactors_(timer_.GetDelta());
 
     pipeline_.Run();
+    debug_drawer_.Run();
   }
 
   this.Initialize = function() {
@@ -45,6 +48,7 @@ function Scene(context) {
     projection_ = new Projection();
 
     pipeline_ = context.CreatePipeline();
+    debug_drawer_ = context.CreateDebugDrawer();
 
     col_scene_ = new Col.Scene();
 
