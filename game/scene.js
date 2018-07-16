@@ -13,6 +13,7 @@ function Scene(context) {
   let actors_ = [];
 
   let col_scene_ = null;
+  let sound_mng_ = null;
 
   function Updateactors_(dt) {
     let num_objects = actors_.length;
@@ -24,7 +25,7 @@ function Scene(context) {
   function Update_() {
     timer_.Update();
 
-    console.log(`FPS : ${timer_.GetFPS()}`);
+    //console.log(`FPS : ${timer_.GetFPS()}`);
 
     projection_.Update();
     pipeline_.UpdateViewProjection(camera_, projection_);
@@ -47,6 +48,8 @@ function Scene(context) {
     pipeline_ = context.CreatePipeline();
 
     col_scene_ = new Col.Scene();
+    sound_mng_ = new SoundManager();
+    sound_mng_.Generate('data/sounds/example').Play();
 
     timer_.Start();
     return true;
