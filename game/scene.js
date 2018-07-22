@@ -1,5 +1,7 @@
 // Copyright 2018 TAP, Inc. All Rights Reserved.
 
+var Game = Game || {};
+
 function Scene(context) {
   'use strict';
 
@@ -49,7 +51,7 @@ function Scene(context) {
 
     col_scene_ = new Col.Scene();
     sound_mng_ = new SoundManager();
-    sound_mng_.Generate('data/sounds/example').Play();
+    sound_mng_.Generate('data/sounds/quiet_hill').Play();
 
     timer_.Start();
     return true;
