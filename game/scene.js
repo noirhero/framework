@@ -49,7 +49,7 @@ function Scene(context) {
 
     pipeline_ = context.CreatePipeline();
 
-    col_scene_ = new Col.Scene();
+    col_scene_ = new Game.CollisionScene();
     sound_mng_ = new SoundManager();
     sound_mng_.Generate('data/sounds/quiet_hill').Play();
 

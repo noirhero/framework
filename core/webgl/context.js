@@ -60,9 +60,9 @@ function Context() {
     }
     //gl_ = WebGLDebugUtils.makeDebugContext(gl_);
 
-    window.addEventListener('mousedown', function() {
-      canvas_.loseContext();
-    });
+    // window.addEventListener('mousedown', function() {
+    //   canvas_.loseContext();
+    // });
 
     return true;
   };
