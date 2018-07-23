@@ -47,7 +47,7 @@ WebGL.InstanceAnimation.prototype.Update = function(dt) {
   this.state_.duration += dt * 1000;
 };
 
-WebGL.InstanceAnimation.prototype.FillVertices = function(offset, dest_vertices, quad_position) {
+WebGL.InstanceAnimation.prototype.FillVertices = function(offset, dest_vertices, quad_position, texture_index) {
   'use strict';
 
   const world_transform = this.world_transform_;
@@ -63,5 +63,6 @@ WebGL.InstanceAnimation.prototype.FillVertices = function(offset, dest_vertices,
     dest_vertices[offset++] = world_transform[13];
     dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     dest_vertices[offset++] = current_texcoord[texcoord_offset++];
+    dest_vertices[offset++] = texture_index;
   }
 };

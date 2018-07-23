@@ -18,7 +18,7 @@ WebGL.InstanceTexture.prototype.GetTexture = function() {
   return this.texture_;
 };
 
-WebGL.InstanceTexture.prototype.FillVertices = function(offset, dest_vertices, quad_position) {
+WebGL.InstanceTexture.prototype.FillVertices = function(offset, dest_vertices, quad_position, texture_index) {
   'use strict';
 
   const world_transform = this.world_transform_;
@@ -35,5 +35,6 @@ WebGL.InstanceTexture.prototype.FillVertices = function(offset, dest_vertices, q
     dest_vertices[offset++] = pos_z;
     dest_vertices[offset++] = current_texcoord[texcoord_offset++];
     dest_vertices[offset++] = current_texcoord[texcoord_offset++];
+    dest_vertices[offset++] = texture_index;
   }
 };

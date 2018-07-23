@@ -52,8 +52,8 @@ WebGL.Texture.prototype.Bind = function(index, sampler_pos) {
   }
 
   const gl = this.gl_;
-  gl.activeTexture(gl.TEXTURE0 + index);
   gl.bindTexture(gl.TEXTURE_2D, this.texture_);
+  gl.activeTexture(gl.TEXTURE0 + index);
   gl.uniform1i(sampler_pos, index);
 
   return true;

@@ -61,6 +61,10 @@ function Scene(context) {
     context.Run();
   };
 
+  this.ActorAssignmentBackground = function() {
+    return actors_[actors_.length] = new Game.Background(res_mng_, pipeline_, col_scene_);
+  };
+
   this.ActorAssignment = function() {
     return actors_[actors_.length] = new Actor(res_mng_, pipeline_, col_scene_);
   };

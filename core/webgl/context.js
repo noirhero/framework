@@ -47,7 +47,7 @@ function Context() {
 
   this.Initialize = function() {
     canvas_ = document.getElementById('main_canvas');
-    //canvas_ = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas_);
+    canvas_ = WebGLDebugUtils.makeLostContextSimulatingCanvas(canvas_);
     canvas_.addEventListener('webglcontextlost', ContextLost_, false);
     canvas_.addEventListener('webglcontextrestored', ContextRestored_, false);
 
@@ -58,11 +58,11 @@ function Context() {
     if (!gl_) {
       return false;
     }
-    //gl_ = WebGLDebugUtils.makeDebugContext(gl_);
+    gl_ = WebGLDebugUtils.makeDebugContext(gl_);
 
-    // window.addEventListener('mousedown', function() {
-    //   canvas_.loseContext();
-    // });
+    window.addEventListener('mousedown', function() {
+      canvas_.loseContext();
+    });
 
     return true;
   };

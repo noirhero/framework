@@ -11,6 +11,7 @@ WebGL.Pipeline = function(gl) {
 
   this.a_world_pos_ = null;
   this.a_tex_coord_ = null;
+  this.a_tex_index_ = null;
   this.u_vp_transform_ = null;
   this.s_sprite_ = null;
 
@@ -38,6 +39,7 @@ WebGL.Pipeline.prototype.CreateShader = function(type, src) {
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+    console.error(gl.getShaderInfoLog(shader));
     alert('Compile shader failed.\n' + src + '\n');
     shader = null;
   }
@@ -51,14 +53,17 @@ WebGL.Pipeline.prototype.CreateVertexShader = function() {
   const src = [
     'attribute vec3 world_pos;',
     'attribute vec2 tex_coord;',
+    'attribute float tex_index;',
 
     'uniform mat4 vp_transform;',
 
     'varying vec2 out_tex_coord;',
+    'varying float out_tex_index;',
 
     'void main() {',
     ' gl_Position = vp_transform * vec4(world_pos, 1.0);',
     ' out_tex_coord = tex_coord;',
+    ' out_tex_index = tex_index;',
     '}',
   ].join('\n');
 
@@ -69,14 +74,26 @@ WebGL.Pipeline.prototype.CreateFragmentShader = function() {
   'use strict';
 
   const src = [
-    'precision lowp float;',
+    'precision mediump float;',
 
-    'uniform sampler2D sampler_sprite;',
+    'uniform sampler2D sampler_sprite[' + CONST.NUM_MAX_TEXTURES + '];',
 
     'varying vec2 out_tex_coord;',
+    'varying float out_tex_index;',
+
+    'vec4 FindTexture(int tex_index) {',
+    ' vec4 color = vec4(1.0);',
+    ' for(int i = 0; i < ' + CONST.NUM_MAX_TEXTURES + '; ++i) {',
+    '   if(i == tex_index) {',
+    '     color = texture2D(sampler_sprite[i], out_tex_coord);',
+    '     break;',
+    '   }',
+    ' }',
+    ' return color;',
+    '}',
 
     'void main() {',
-    ' gl_FragColor = texture2D(sampler_sprite, out_tex_coord);',
+    ' gl_FragColor = FindTexture(int(out_tex_index));',
     ' if(0.0 == gl_FragColor.a) {',
     '   discard;',
     ' }',
@@ -120,7 +137,7 @@ WebGL.Pipeline.prototype.FillVertices = function() {
   'use strict';
 
   const max_instance = CONST.NUM_MAX_INSTANCES;
-  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV_TI;
 
   let vertices = new Float32Array(max_instance * stride);
 
@@ -133,24 +150,28 @@ WebGL.Pipeline.prototype.FillVertices = function() {
     vertices[offset + 2] = 0.0;
     vertices[offset + 3] = 0.0;
     vertices[offset + 4] = 1.0;
+    vertices[offset + 5] = 0.0;
 
-    vertices[offset + 5] = 0.5;
     vertices[offset + 6] = 0.5;
-    vertices[offset + 7] = 0.0;
-    vertices[offset + 8] = 1.0;
+    vertices[offset + 7] = 0.5;
+    vertices[offset + 8] = 0.0;
     vertices[offset + 9] = 1.0;
+    vertices[offset + 10] = 1.0;
+    vertices[offset + 11] = 0.0;
 
-    vertices[offset + 10] = -0.5;
-    vertices[offset + 11] = -0.5;
-    vertices[offset + 12] = 0.0;
-    vertices[offset + 13] = 0.0;
+    vertices[offset + 12] = -0.5;
+    vertices[offset + 13] = -0.5;
     vertices[offset + 14] = 0.0;
-
-    vertices[offset + 15] = 0.5;
-    vertices[offset + 16] = -0.5;
+    vertices[offset + 15] = 0.0;
+    vertices[offset + 16] = 0.0;
     vertices[offset + 17] = 0.0;
-    vertices[offset + 18] = 1.0;
-    vertices[offset + 19] = 0.0;
+
+    vertices[offset + 18] = 0.5;
+    vertices[offset + 19] = -0.5;
+    vertices[offset + 20] = 0.0;
+    vertices[offset + 21] = 1.0;
+    vertices[offset + 22] = 0.0;
+    vertices[offset + 23] = 0.0;
   }
 
   return vertices;
@@ -221,6 +242,7 @@ WebGL.Pipeline.prototype.Initialize = function() {
 
   this.a_world_pos_ = gl.getAttribLocation(program, 'world_pos');
   this.a_tex_coord_ = gl.getAttribLocation(program, 'tex_coord');
+  this.a_tex_index_ = gl.getAttribLocation(program, 'tex_index');
   this.u_vp_transform_ = gl.getUniformLocation(program, 'vp_transform');
   this.s_sprite_ = gl.getUniformLocation(program, 'sampler_sprite');
 
@@ -266,6 +288,7 @@ WebGL.Pipeline.prototype.Run = function() {
 
   const a_world_pos_ = this.a_world_pos_;
   const a_tex_coord_ = this.a_tex_coord_;
+  const a_tex_index_ = this.a_tex_index_;
   const s_sprite_ = this.s_sprite_;
   const u_vp_transform_ = this.u_vp_transform_;
   const vertices_ = this.vertices_;
@@ -279,9 +302,9 @@ WebGL.Pipeline.prototype.Run = function() {
   let fill_index = 0;
   let instance = null;
   let current_texture = null;
-  let prev_bind_texture = null;
+  let bind_textures = [];
 
-  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
+  const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV_TI;
   const quad_position = CONST.QUAD_POSITION;
 
   for(let i = 0; i < num_instances; ++i) {
@@ -291,15 +314,26 @@ WebGL.Pipeline.prototype.Run = function() {
     if(!current_texture) {
       continue;
     }
-    else if(prev_bind_texture !== current_texture) {
-      if(false == current_texture.Bind(0, s_sprite_)) {
+
+    let texture_index = null;
+    const num_bind_textures = bind_textures.length;
+    for(let bi = 0; bi < num_bind_textures; ++bi) {
+      if(bind_textures[bi] === current_texture) {
+        texture_index = bi;
+        break;
+      }
+    }
+
+    if(null === texture_index) {
+      if(false === current_texture.Bind(num_bind_textures, s_sprite_)) {
         continue;
       }
 
-      prev_bind_texture = current_texture;
+      bind_textures[num_bind_textures] = current_texture;
+      texture_index = num_bind_textures;
     }
 
-    instance.FillVertices(fill_index * stride, vertices_, quad_position);
+    instance.FillVertices(fill_index * stride, vertices_, quad_position, texture_index);
     ++fill_index;
   }
 
@@ -318,6 +352,8 @@ WebGL.Pipeline.prototype.Run = function() {
   gl.enableVertexAttribArray(a_world_pos_);
   gl.vertexAttribPointer(a_tex_coord_, 2, gl.FLOAT, false, stride, 12);
   gl.enableVertexAttribArray(a_tex_coord_);
+  gl.vertexAttribPointer(a_tex_index_, 1, gl.FLOAT, false, stride, 20);
+  gl.enableVertexAttribArray(a_tex_index_);
 
   gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
 };

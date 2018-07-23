@@ -16,6 +16,13 @@ function Main() {
 
   let world_transform = null;
   let actor = null;
+
+  actor = scene.ActorAssignmentBackground();
+  actor.Initialize('data/textures/dungeon_tile.png')
+
+  world_transform = actor.GetWorldTransform();
+  mat4.scale(world_transform, world_transform, [256, 256, 1]);
+
   for(let i = 0; i < 2; ++i) {
     actor = scene.ActorAssignment();
     actor.Initialize('data/animations/skeleton.json');
