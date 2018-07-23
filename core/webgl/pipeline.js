@@ -278,22 +278,25 @@ WebGL.Pipeline.prototype.Run = function() {
 
   let fill_index = 0;
   let instance = null;
-  let current_animation = null;
-  let prev_bind_animation = null;
+  let current_texture = null;
+  let prev_bind_texture = null;
 
   const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV;
   const quad_position = CONST.QUAD_POSITION;
 
   for(let i = 0; i < num_instances; ++i) {
     instance = instances_[i];
-    current_animation = instance.GetAnimation();
+    current_texture = instance.GetTexture();
 
-    if(prev_bind_animation !== current_animation) {
-      if(false == current_animation.BindTexture(0, s_sprite_)) {
+    if(!current_texture) {
+      continue;
+    }
+    else if(prev_bind_texture !== current_texture) {
+      if(false == current_texture.Bind(0, s_sprite_)) {
         continue;
       }
 
-      prev_bind_animation = current_animation;
+      prev_bind_texture = current_texture;
     }
 
     instance.FillVertices(fill_index * stride, vertices_, quad_position);

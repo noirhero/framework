@@ -9,7 +9,7 @@ function Actor(res_mng, pipeline, col_scene) {
   public functions
   */
   this.Initialize = function(url) {
-    instance_ = new Instance(res_mng.GetAnimation(url));
+    instance_ = new WebGL.InstanceAnimation(res_mng.GetAnimation(url));
     instance_.SetState('idle_l', Math.RandomRanged(0, 1000));
     pipeline.AddInstance(instance_);
 
