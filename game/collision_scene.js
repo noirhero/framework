@@ -36,9 +36,9 @@ Game.CollisionScene = function() {
         continue;
       }
 
-      // if(false === SAT.testCircleCircle(other.GetSphere(), bound_sphere)) {
-      //   continue;
-      // }
+      if(false === SAT.testCircleCircle(other.GetSphere(), bound_sphere)) {
+        continue;
+      }
 
       response_.clear();
       if(true === SAT.testPolygonPolygon(other.GetShape(), bound_shape, response_)) {

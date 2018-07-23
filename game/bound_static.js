@@ -10,7 +10,8 @@ Game.BoundStatic = function(instance, points) {
 
   const convex = this.convex_;
   const aabb = convex.getAABB();
-  this.sphere_ = new SAT.Circle(convex.getCentroid(), Math.max(aabb.w, aabb.h) * 0.5);
+  const r = aabb.points[2].len() * 0.5;
+  this.sphere_ = new SAT.Circle(convex.getCentroid(), r);
 };
 
 Game.BoundStatic.prototype = Object.create(Game.Bound.prototype);

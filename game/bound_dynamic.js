@@ -33,8 +33,9 @@ Game.BoundDynamic.prototype.GetShape = function() {
     this.dirty_ = false;
 
     const sphere = this.sphere_;
-    const w = sphere.r * 2;
-    this.box_ = sphere.getAABB();//new SAT.Box(sphere.pos, w, w).toPolygon();
+    const r_pow = sphere.r * sphere.r;
+    const w = Math.sqrt(r_pow + r_pow);
+    this.box_ = new SAT.Box(sphere.pos, w, w).toPolygon();
   }
 
   return this.box_;
