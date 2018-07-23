@@ -21,7 +21,7 @@ WebGL.InstanceTexture.prototype.GetTexture = function() {
 WebGL.InstanceTexture.prototype.FillVertices = function(offset, dest_vertices, quad_position) {
   'use strict';
 
-  const world_transform= this.world_transform_;
+  const world_transform = this.world_transform_;
   const pos_z = this.pos_z_;
   const current_texcoord = CONST.EMPTY_TEXCOORD;
 

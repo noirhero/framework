@@ -4,6 +4,7 @@ WebGL.Instance = function() {
   'use strict';
 
   this.world_transform_ = mat4.create();
+  this.world_position_ = vec3.create();
 };
 
 WebGL.Instance.prototype.GetWorldTransform = function() {

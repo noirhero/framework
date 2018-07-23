@@ -5,7 +5,6 @@ WebGL.InstanceAnimation = function(animation) {
 
   WebGL.Instance.call(this);
 
-  this.world_position_ = vec3.create();
   this.animation_ = animation;
   this.state_ = {
     name: null,
