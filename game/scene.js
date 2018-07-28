@@ -61,6 +61,14 @@ function Scene(context) {
     context.Run();
   };
 
+  this.ActorAssignmentPlayer = function() {
+    return actors_[actors_.length] = new Game.Player(res_mng_, pipeline_, col_scene_);
+  };
+
+  this.ActorAssignmentPawn = function() {
+    return actors_[actors_.length] = new Game.Pawn(res_mng_, pipeline_, col_scene_);
+  };
+
   this.ActorAssignmentBackground = function() {
     return actors_[actors_.length] = new Game.Background(res_mng_, pipeline_, col_scene_);
   };

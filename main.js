@@ -17,25 +17,35 @@ function Main() {
   let world_transform = null;
   let actor = null;
 
-  for(let i = 0; i < 2; ++i) {
-    actor = scene.ActorAssignment();
-    actor.Initialize('data/animations/skeleton.json');
+  // for(let i = 0; i < 1; ++i) {
+  //   actor = scene.ActorAssignment();
+  //   actor.Initialize('data/animations/skeleton.json');
+  //
+  //   if(0 === i) {
+  //     actor.SetOwner(true);
+  //   }
+  //
+  //   world_transform = actor.GetWorldTransform();
+  //   mat4.scale(world_transform, world_transform, [100, 50, 1]);
+  //   actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
+  // }
 
-    if(0 === i) {
-      actor.SetOwner(true);
-    }
-
-    world_transform = actor.GetWorldTransform();
-    mat4.scale(world_transform, world_transform, [200, 100, 1]);
-
-    actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
-  }
+  actor = scene.ActorAssignmentPlayer();
+  actor.Initialize('data/animations/skeleton.json');
+  world_transform = actor.GetWorldTransform();
+  mat4.scale(world_transform, world_transform, [100, 50, 1]);
+  actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
 
   actor = scene.ActorAssignmentBackground();
-  actor.Initialize('data/textures/dungeon_tile.png')
-
+  actor.Initialize('data/textures/sample_level.png');
   world_transform = actor.GetWorldTransform();
-  mat4.scale(world_transform, world_transform, [70, 70, 1]);
+  mat4.scale(world_transform, world_transform, [1920, 1080, 1]);
+
+  actor = scene.ActorAssignmentPawn();
+  actor.Initialize('data/animations/skeleton.json');
+  world_transform = actor.GetWorldTransform();
+  mat4.scale(world_transform, world_transform, [100, 50, 1]);
+  actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
 
   scene.Start();
 }
