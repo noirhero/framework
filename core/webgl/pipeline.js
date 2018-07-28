@@ -345,7 +345,7 @@ WebGL.Pipeline.prototype.Run = function() {
     }
 
     if(null === texture_index) {
-      if(false === current_texture.Bind(num_bind_textures, s_sprite_)) {
+      if(false === current_texture.IsLoaded()) {
         continue;
       }
 
