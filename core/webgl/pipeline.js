@@ -39,8 +39,7 @@ WebGL.Pipeline.prototype.CreateShader = function(type, src) {
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    console.error(gl.getShaderInfoLog(shader));
-    alert('Compile shader failed.\n' + src + '\n');
+    alert('Compile shader failed.\n' + src + '\n + gl.getShaderInfoLog(shader)');
     shader = null;
   }
 
@@ -297,8 +296,6 @@ WebGL.Pipeline.prototype.Run = function() {
   const vertex_buffer_ = this.vertex_buffer_;
   const index_buffer_ = this.index_buffer_;
 
-  gl.useProgram(this.program_);
-
   let fill_index = 0;
   let instance = null;
   let current_texture = null;
@@ -306,6 +303,29 @@ WebGL.Pipeline.prototype.Run = function() {
 
   const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV_TI;
   const quad_position = CONST.QUAD_POSITION;
+
+  function DrawElements_() {
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+
+    let num_bind_textures = bind_textures.length;
+    for(let bi = 0; bi < num_bind_textures; ++bi) {
+      bind_textures[bi].Bind(bi, s_sprite_);
+    }
+
+    gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
+  }
+
+  gl.useProgram(this.program_);
+  gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
+  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
+
+  gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
+  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, stride, 0);
+  gl.enableVertexAttribArray(a_world_pos_);
+  gl.vertexAttribPointer(a_tex_coord_, 2, gl.FLOAT, false, stride, 12);
+  gl.enableVertexAttribArray(a_tex_coord_);
+  gl.vertexAttribPointer(a_tex_index_, 1, gl.FLOAT, false, stride, 20);
+  gl.enableVertexAttribArray(a_tex_index_);
 
   for(let i = 0; i < num_instances; ++i) {
     instance = instances_[i];
@@ -316,7 +336,7 @@ WebGL.Pipeline.prototype.Run = function() {
     }
 
     let texture_index = null;
-    const num_bind_textures = bind_textures.length;
+    let num_bind_textures = bind_textures.length;
     for(let bi = 0; bi < num_bind_textures; ++bi) {
       if(bind_textures[bi] === current_texture) {
         texture_index = bi;
@@ -327,6 +347,13 @@ WebGL.Pipeline.prototype.Run = function() {
     if(null === texture_index) {
       if(false === current_texture.Bind(num_bind_textures, s_sprite_)) {
         continue;
+      }
+
+      if(CONST.NUM_MAX_TEXTURES <= num_bind_textures) {
+        DrawElements_();
+
+        num_bind_textures = 0;
+        bind_textures.length = 0;
       }
 
       bind_textures[num_bind_textures] = current_texture;
@@ -341,21 +368,7 @@ WebGL.Pipeline.prototype.Run = function() {
     return;
   }
 
-  gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
-
-  gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, index_buffer_);
-
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
-
-  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, stride, 0);
-  gl.enableVertexAttribArray(a_world_pos_);
-  gl.vertexAttribPointer(a_tex_coord_, 2, gl.FLOAT, false, stride, 12);
-  gl.enableVertexAttribArray(a_tex_coord_);
-  gl.vertexAttribPointer(a_tex_index_, 1, gl.FLOAT, false, stride, 20);
-  gl.enableVertexAttribArray(a_tex_index_);
-
-  gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
+  DrawElements_();
 };
 
 WebGL.Pipeline.prototype.AddInstance = function(instance) {

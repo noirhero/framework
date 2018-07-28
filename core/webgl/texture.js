@@ -44,19 +44,19 @@ WebGL.Texture.prototype.OnContextLost = function() {
   }
 };
 
-WebGL.Texture.prototype.Bind = function(index, sampler_pos) {
+WebGL.Texture.prototype.IsLoaded = function() {
   'use strict';
 
-  if(this.image_) {
-    return false;
-  }
+  return this.image_ ? false : true;
+};
+
+WebGL.Texture.prototype.Bind = function(index, sampler_pos) {
+  'use strict';
 
   const gl = this.gl_;
   gl.bindTexture(gl.TEXTURE_2D, this.texture_);
   gl.activeTexture(gl.TEXTURE0 + index);
   gl.uniform1i(sampler_pos, index);
-
-  return true;
 };
 
 WebGL.Texture.prototype.GetSrc = function() {
