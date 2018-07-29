@@ -17,4 +17,14 @@ Sound.prototype.Play = function() {
   else {
     this.handle_.play(this.id_);
   }
+
+  return this;
+};
+
+Sound.prototype.Loop = function(flag) {
+  'use strict';
+
+  this.handle_.loop(flag, this.id_);
+
+  return this;
 };
