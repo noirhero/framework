@@ -300,6 +300,7 @@ WebGL.Pipeline.prototype.Run = function() {
   let instance = null;
   let current_texture = null;
   let bind_textures = [];
+  let bind_texture_indices = [];
 
   const stride = CONST.VERTEX_STRIDE_X_Y_Z_TU_TV_TI;
   const quad_position = CONST.QUAD_POSITION;
@@ -309,8 +310,9 @@ WebGL.Pipeline.prototype.Run = function() {
 
     let num_bind_textures = bind_textures.length;
     for(let bi = 0; bi < num_bind_textures; ++bi) {
-      bind_textures[bi].Bind(bi, s_sprite_);
+      bind_textures[bi].Bind(bi);
     }
+    gl.uniform1iv(s_sprite_, bind_texture_indices);
 
     gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
   }
@@ -354,9 +356,11 @@ WebGL.Pipeline.prototype.Run = function() {
 
         num_bind_textures = 0;
         bind_textures.length = 0;
+        bind_texture_indices.length = 0;
       }
 
       bind_textures[num_bind_textures] = current_texture;
+      bind_texture_indices[num_bind_textures] = num_bind_textures;
       texture_index = num_bind_textures;
     }
 
