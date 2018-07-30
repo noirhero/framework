@@ -37,5 +37,10 @@ Game.SceneSample.prototype.Initialize = function() {
   mat4.scale(world_transform, world_transform, [100, 50, 1]);
   actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
 
+  actor = this.ActorAssignmentInputArrow();
+  actor.Initialize('data/textures/input_arrow.png');
+  world_transform = actor.GetWorldTransform();
+  mat4.scale(world_transform, world_transform, [128, 128, 1]);
+
   return true;
 };

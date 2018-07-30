@@ -117,31 +117,28 @@ function Input() {
       let absX = Math.abs(calculateX);
       let absY = Math.abs(calculateY);
 
+      if(absX == 0 && absY == 0)
+        return;
+
       vec2.set(input_direction_, 0, 0);
       input_state_ = 0;
 
-      if(absX > absY)
-      {
-        if(calculateX < 0) {
-          input_direction_[0] = -1;
-          input_state_ = input_enum_.KeyLeft; 
-        }
-        else if(calculateX > 0) {
-          input_direction_[0] = 1;
-          input_state_ = input_enum_.KeyRight; 
-        }
-
+      let vertical = absX < absY;
+      if(!vertical && calculateX < 0) {
+        input_direction_[0] = -1;
+        input_state_ = input_enum_.KeyLeft; 
       }
-      else if(absX < absY)
-      {
-        if(calculateY < 0) {
-          input_direction_[1] = 1;
-          input_state_ = input_enum_.KeyUp; 
-        }
-        else if(calculateY > 0) {
-          input_direction_[1] = -1;
-          input_state_ = input_enum_.KeyDown; 
-        }
+      else if(!vertical && calculateX > 0) {
+        input_direction_[0] = 1;
+        input_state_ = input_enum_.KeyRight; 
+      }
+      else if(vertical && calculateY < 0) {
+        input_direction_[1] = 1;
+        input_state_ = input_enum_.KeyUp; 
+      }
+      else if(vertical &&calculateY > 0) {
+        input_direction_[1] = -1;
+        input_state_ = input_enum_.KeyDown; 
       }
     }
   }
