@@ -114,19 +114,34 @@ function Input() {
       let calculateX = inTarget.x - inPivot.x;
       let calculateY = inTarget.y - inPivot.y;
       
-      vec2.set(input_direction_, 0, 0);
+      let absX = Math.abs(calculateX);
+      let absY = Math.abs(calculateY);
 
-      if(calculateX < 0) {
-        input_direction_[0] = -1;
+      vec2.set(input_direction_, 0, 0);
+      input_state_ = 0;
+
+      if(absX > absY)
+      {
+        if(calculateX < 0) {
+          input_direction_[0] = -1;
+          input_state_ = input_enum_.KeyLeft; 
+        }
+        else if(calculateX > 0) {
+          input_direction_[0] = 1;
+          input_state_ = input_enum_.KeyRight; 
+        }
+
       }
-      if(calculateX > 0) {
-        input_direction_[0] = 1;
-      }
-      if(calculateY < 0) {
-        input_direction_[1] = 1;
-      }
-      if(calculateY > 0) {
-        input_direction_[1] = -1;
+      else if(absX < absY)
+      {
+        if(calculateY < 0) {
+          input_direction_[1] = 1;
+          input_state_ = input_enum_.KeyUp; 
+        }
+        else if(calculateY > 0) {
+          input_direction_[1] = -1;
+          input_state_ = input_enum_.KeyDown; 
+        }
       }
     }
   }
@@ -134,6 +149,7 @@ function Input() {
   function ReleaseTouchInputState() {
     vec2.set(input_direction_, 0, 0);
     input_touch_stack.length = 0;
+    input_state_ = 0;
   }
 
   /*
