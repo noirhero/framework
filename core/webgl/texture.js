@@ -19,8 +19,9 @@ WebGL.Texture.prototype.Initialize = function() {
   function OnLoadImage_() {
     const gl = this.gl_;
 
-    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+    gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, this.texture_);
+    gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, this.image_);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
@@ -44,19 +45,18 @@ WebGL.Texture.prototype.OnContextLost = function() {
   }
 };
 
-WebGL.Texture.prototype.Bind = function(index, sampler_pos) {
+WebGL.Texture.prototype.IsLoaded = function() {
   'use strict';
 
-  if(this.image_) {
-    return false;
-  }
+  return this.image_ ? false : true;
+};
+
+WebGL.Texture.prototype.Bind = function(index) {
+  'use strict';
 
   const gl = this.gl_;
   gl.activeTexture(gl.TEXTURE0 + index);
   gl.bindTexture(gl.TEXTURE_2D, this.texture_);
-  gl.uniform1i(sampler_pos, index);
-
-  return true;
 };
 
 WebGL.Texture.prototype.GetSrc = function() {

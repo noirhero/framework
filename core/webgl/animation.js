@@ -92,7 +92,7 @@ WebGL.Animation.prototype.GetTextureCoordinate = function(state_info) {
     return frame.rect;
   }
 
-  const key = state_info.state;
+  const key = state_info.name;
   const frame_info = this.frame_infos_[key];
   let duration = state_info.duration;
 
@@ -102,7 +102,7 @@ WebGL.Animation.prototype.GetTextureCoordinate = function(state_info) {
       state_info.duration = duration;
 
       if('once' == frame_info.mode) {
-        state_info.state = frame_info.next_state;
+        state_info.name = frame_info.next_state;
 
         return this.GetTextureCoordinate(state_info);
       }
@@ -127,16 +127,12 @@ WebGL.Animation.prototype.SetMode = function(state, mode, next_state) {
   frame_info.next_state = next_state;
 };
 
-WebGL.Animation.prototype.BindTexture = function(index, sampler_pos) {
-  if(!this.texture_) {
-    return false;
-  }
-
-  return this.texture_.Bind(index, sampler_pos);
-};
-
 WebGL.Animation.prototype.GetSrc = function() {
   return this.url_;
+};
+
+WebGL.Animation.prototype.GetTexture = function() {
+  return this.texture_;
 };
 
 WebGL.Animation.prototype.GetTextureSrc = function() {
