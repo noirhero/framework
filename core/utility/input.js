@@ -7,8 +7,15 @@ function Input() {
   public functions
   */
   this.Initialize = function() {
+    // keyboard
     document.addEventListener('keydown', Keydown_, false);
     document.addEventListener('keyup', Keyup_, false);
+
+    // touch
+    document.addEventListener("touchstart", TouchStart_, false);
+    document.addEventListener("touchend", TouchEnd_, false);
+    document.addEventListener("touchcancel", TouchCancel_, false);
+    document.addEventListener("touchmove", TouchMove_, false);
   }
 
   this.IsDownKey = function(key) {
@@ -69,11 +76,72 @@ function Input() {
     }
   }
 
+  function TouchStart_(event){  
+    
+    ReleaseTouchInputState();
+  }
+
+  function TouchEnd_(event){
+
+    ReleaseTouchInputState();
+  }
+
+  function TouchCancel_(event){
+
+    ReleaseTouchInputState();
+  }
+
+  function TouchMove_(event){
+
+    let cached_touches = event.changedTouches;
+    
+    for(let i=0; i<cached_touches.length; i++) {
+      input_touch_stack.push({
+        x : cached_touches[i].screenX,
+        y : cached_touches[i].screenY,
+      });
+    }
+
+    RegistTouchInputState();
+  }
+
+  function RegistTouchInputState() {
+    if(input_touch_stack.length > 1)
+    {
+      let inPivot = input_touch_stack[0];
+      let inTarget = input_touch_stack[input_touch_stack.length-1];
+
+      let calculateX = inTarget.x - inPivot.x;
+      let calculateY = inTarget.y - inPivot.y;
+      
+      vec2.set(input_direction_, 0, 0);
+
+      if(calculateX < 0) {
+        input_direction_[0] = -1;
+      }
+      if(calculateX > 0) {
+        input_direction_[0] = 1;
+      }
+      if(calculateY < 0) {
+        input_direction_[1] = 1;
+      }
+      if(calculateY > 0) {
+        input_direction_[1] = -1;
+      }
+    }
+  }
+  
+  function ReleaseTouchInputState() {
+    vec2.set(input_direction_, 0, 0);
+    input_touch_stack.length = 0;
+  }
+
   /*
   private variables
   */
   var input_state_ = 0;
   var input_direction_ = vec2.create();
+  var input_touch_stack = [];
   const input_enum_ = {KeyLeft: 1, KeyRight: 2, KeyUp: 4, KeyDown: 8, SpaceBar: 16};
 
   this.input_enum = input_enum_;
