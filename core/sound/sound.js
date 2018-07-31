@@ -28,3 +28,25 @@ Sound.prototype.Loop = function(flag) {
 
   return this;
 };
+
+Sound.prototype.Pos = function(x, y ) {
+  'use strict';
+
+  this.handle_.pos(x, y, 0, this.id_);
+
+  return this;
+};
+
+Sound.prototype.PannerAttribute = function(distance) {
+  'use strict';
+
+  this.handle_.pannerAttr({
+    panningModel: 'HRTF',
+    //refDistance: 0.8,
+    //rolloffFactor: 2.5,
+    distanceModel: 'linear',
+    maxDistance: 1000000000,
+  }, this.id_);
+
+  return this;
+};

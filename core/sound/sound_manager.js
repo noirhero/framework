@@ -19,4 +19,12 @@ function SoundManager() {
 
     return sound;
   };
+
+  this.UpdateListenerPos = function(x, y) {
+    Howler.pos(x, y, 0);
+  };
+
+  this.UpdateListenerRotation = function(x, y) {
+    Howler.orientation(x, y, 0);
+  };
 }
