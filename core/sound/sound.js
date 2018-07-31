@@ -40,13 +40,14 @@ Sound.prototype.Pos = function(x, y ) {
 Sound.prototype.PannerAttribute = function(distance) {
   'use strict';
 
-  this.handle_.pannerAttr({
-    panningModel: 'HRTF',
-    //refDistance: 0.8,
-    //rolloffFactor: 2.5,
-    distanceModel: 'linear',
-    maxDistance: 1000000000,
-  }, this.id_);
+  if(!this.handle_.playing(this.id_)) {
+    this.handle_.on('play', this.PannerAttribute.bind(this, distance), this.id_);
+  }
+  else {
+    this.handle_.pannerAttr({
+      maxDistance: distance,
+    }, this.id_);
+  }
 
   return this;
 };
