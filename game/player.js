@@ -1,9 +1,9 @@
 // Copyright, TAP, Inc. All Rights Reserved.
 
-Game.Player = function(res_mng, pipeline, col_scene) {
+Game.Player = function(res_mng, pipeline, col_scene, debug_drawer) {
   'use strict';
 
-  Game.Pawn.call(this, res_mng, pipeline, col_scene);
+  Game.Pawn.call(this, res_mng, pipeline, col_scene, debug_drawer);
 
   this.input_ = null;
 

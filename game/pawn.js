@@ -1,9 +1,9 @@
 // Copyright, TAP, Inc. All Rights Reserved.
 
-Game.Pawn = function(res_mng, pipeline, col_scene) {
+Game.Pawn = function(res_mng, pipeline, col_scene, debug_drawer) {
   'use strict';
 
-  Game.Actor.call(this, res_mng, pipeline, col_scene);
+  Game.Actor.call(this, res_mng, pipeline, col_scene, debug_drawer);
 
   this.instance_ = null;
   this.col_shape_ = null;
@@ -35,6 +35,9 @@ Game.Pawn.prototype.Initialize = function(url) {
 
   this.instance_ = instance;
   this.col_shape_ = this.col_scene_.AssignementDynamic(instance, 20);
+
+  this.debug_drawer_.DrawBound(this.col_shape_);
+  this.debug_drawer_.DrawBox([50, 50], 50, 50);
 };
 
 Game.Pawn.prototype.Update = function(dt) {

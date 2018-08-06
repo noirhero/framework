@@ -6,6 +6,11 @@ WebGL.DebugDrawer = function(gl) {
   WebGL.Pipeline.call(this, gl);
 
   this.u_color_ = null;
+
+  this.boxes_ = [];
+  this.circles_ = [];
+  this.lines_ = [];
+  this.bounds_ = [];
 }
 
 WebGL.DebugDrawer.prototype = Object.create(WebGL.Pipeline.prototype);
@@ -49,23 +54,7 @@ WebGL.DebugDrawer.prototype.CreateFragmentShader = function() {
 WebGL.DebugDrawer.prototype.FillVertices = function() {
   'use strict';
 
-  const max_instance = 2;
-  const stride = 3;
-
-  let vertices = new Float32Array(max_instance * stride);
-
-  // vertices[0] = -0.5; // left-top
-  // vertices[1] = 0.5;
-  // vertices[2] = 1.0;
-  
-  // vertices[3] = 0.5;  // right-top
-  // vertices[4] = 0.5;
-  // vertices[5] = 1.0;
-
-  // vertices[] = 0.5;  // right-bottom
-  // vertices[] = -0.5;
-  // vertices[] = -0.5; // left-bottom
-  // vertices[] = -0.5;
+  let vertices = new Float32Array(24);
 
   return vertices;
 };
@@ -103,11 +92,6 @@ WebGL.DebugDrawer.prototype.Initialize = function() {
 }
 
 WebGL.DebugDrawer.prototype.Run = function() {
-  //const instances_ = this.instances_;
-  //const num_instances = instances_.length;
-  // if(0 === num_instances) {
-  //   return;
-  // }
 
   const gl = this.gl_;
 
@@ -117,63 +101,120 @@ WebGL.DebugDrawer.prototype.Run = function() {
   const u_vp_transform_ = this.u_vp_transform_;
   const vertices_ = this.vertices_;
   const transform_vp_ = this.transform_vp_;
-//  const u_color_ = this.u_color_;
-
   const vertex_buffer_ = this.vertex_buffer_;
 
   gl.useProgram(this.program_);
-
-  const QUAD_POSITION = [
-    vec3.fromValues(-0.5, 0.5, 0.0),
-    vec3.fromValues(0.5, 0.5, 0.0),
-  ];
-
-  const quad_position = QUAD_POSITION;
-  let world_position_ = vec3.create();
-  let world_transform_ = mat4.create();
-  //world_transform_[12] = 10;
-  //world_transform_[13] = 100;
-
-  world_transform_[0] = 100;
   
-  vec3.transformMat4(world_position_, quad_position[0], world_transform_);
-  vertices_[0] = world_position_[0];
-  vertices_[1] = world_position_[1];
-  vertices_[2] = world_position_[2];
+  // separate each part
+  function DrawBoxes(boxes) {
+    const num_boxes = boxes.length;
+    if(0 === num_boxes) {
+      return;
+    }
 
-  vec3.transformMat4(world_position_, quad_position[1], world_transform_);
-  vertices_[3] = world_position_[0];
-  vertices_[4] = world_position_[1];
-  vertices_[5] = world_position_[2];
+    const QUAD_POSITION = [
+      vec3.fromValues(-0.5, 0.5, 0.0),
+      vec3.fromValues(0.5, 0.5, 0.0),
+      vec3.fromValues(0.5, -0.5, 0.0),
+      vec3.fromValues(-0.5, -0.5, 0.0)
+    ];
+  
+    const quad_position = QUAD_POSITION;
+    let world_position_ = vec3.create();
+    let world_transform_ = mat4.create();
 
-  // for(let i = 0; i < num_instances; ++i) {
-  //   instance = instances_[i];
-  //   current_animation = instance.GetAnimation();
+    let fill_index = 0;
+    for(let i = 0; i < num_boxes; ++i) {
+      world_transform_[12] = boxes[i].pos[0];
+      world_transform_[13] = boxes[i].pos[1];
 
-  //   if(prev_bind_animation !== current_animation) {
-  //     if(false == current_animation.BindTexture(0, s_sprite_)) {
-  //       continue;
-  //     }
+      world_transform_[0] = boxes[i].width;
+      world_transform_[5] = boxes[i].height;
+      
+      for(let j = 0; j < CONST.QUAD_STRIDE; ++j) {
+        vec3.transformMat4(world_position_, quad_position[j], world_transform_);
+        vertices_[fill_index++] = world_position_[0];
+        vertices_[fill_index++] = world_position_[1];
+        vertices_[fill_index++] = world_position_[2];
+      }
+    }
+  
+    if(0 === fill_index) {
+      return;
+    }
+    
+    gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
+  
+    gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
+    gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+  
+    gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, 12, 0);
+    gl.enableVertexAttribArray(a_world_pos_);
+  
+    gl.drawArrays(gl.LINE_LOOP, 0, 4);
+  }
 
-  //     prev_bind_animation = current_animation;
-  //   }
+  function DrawCircles() {
 
-  //   instance.FillVertices(fill_index * stride, vertices_, quad_position);
-  //   ++fill_index;
-  // }
+  }
 
-  // if(0 === fill_index) {
-  //   return;
-  // }
-  const stride = 12;
+  function DrawLines() {
 
-  gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
+  }
 
-  gl.bindBuffer(gl.ARRAY_BUFFER, vertex_buffer_);
-  gl.bufferSubData(gl.ARRAY_BUFFER, 0, vertices_);
+  function DrawBounds(bounds) {
+    const num_bounds = bounds.length;
+    if(0 === num_bounds) {
+      return;
+    }
 
-  gl.vertexAttribPointer(a_world_pos_, 3, gl.FLOAT, false, stride, 0);
-  gl.enableVertexAttribArray(a_world_pos_);
+    for(let i = 0; i < num_bounds; ++i) {
+      if(!bounds[i].box_) {
+        continue;
+      }
 
-  gl.drawArrays(gl.LINES, 0, 2);
+      console.log(bounds[0].box_);
+    }
+  }
+
+  DrawBoxes(this.boxes_);
+  //DrawBounds(this.bounds_);
+
+ 
+//  const u_color_ = this.u_color_;
+
+
 };
+
+
+
+
+WebGL.DebugDrawer.prototype.DrawBox = function(pos, w, h) {
+  'use strict';
+
+  let new_box = {pos: pos, width: w, height: h};
+
+  //this.boxes_[this.boxes_.length] = new_box;
+
+  if(0 === this.boxes_.length) {
+    this.boxes_.push(new_box);
+  }
+  
+  console.log("DrawBox");
+  console.log(this.boxes_);
+}
+
+WebGL.DebugDrawer.prototype.DrawBound = function(bound) {
+  'use strict';
+
+  this.bounds_.push(bound);
+
+  //console.log(bound.instance_.GetWorldTransform());
+  //console.log(this.bounds_);
+}
+
+WebGL.DebugDrawer.prototype.ClearAllBox = function() {
+  'use strict';
+
+  this.boxes_ = [];
+}
