@@ -5,6 +5,8 @@ Game.SceneSample = function(context) {
 
   Game.Scene.call(this, context);
 
+  this.mono_filter_ = null;
+
   this.player_ = null;
 };
 
@@ -15,7 +17,20 @@ Game.SceneSample.prototype.SceneUpdate = Game.Scene.prototype.Update;
 Game.SceneSample.prototype.Update = function() {
   'use strict';
 
-  this.SceneUpdate();
+  this.timer_.Update();
+
+  this.projection_.Update();
+  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
+
+  const dt = this.timer_.GetDelta();
+  const num_objects = this.actors_.length;
+  for(let i = 0; i < num_objects; ++i) {
+    this.actors_[i].Update(dt);
+  }
+
+  this.mono_filter_.Begin();
+  this.pipeline_.Run();
+  this.mono_filter_.End();
 
   const wtm = this.player_.GetWorldTransform();
   this.sound_mng_.UpdateListenerPos(wtm[12], wtm[13]);
@@ -30,6 +45,8 @@ Game.SceneSample.prototype.Initialize = function() {
   }
 
   this.context_.SetTickFunction(this.Update.bind(this));
+
+  this.mono_filter_ = this.context_.CreatePostprocessMonoColor();
 
   let world_transform = null;
   let actor = null;

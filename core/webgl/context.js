@@ -81,6 +81,10 @@ function Context() {
     return InitializeAndInsertResource(new WebGL.Pipeline(gl_), gl_resources_);
   };
 
+  this.CreatePostprocessMonoColor = function() {
+    return InitializeAndInsertResource(new WebGL.PostprocessMonoColor(gl_), gl_resources_);
+  };
+
   this.SetTickFunction = function(tick_fn) {
     tick_fn_ = tick_fn;
   };

@@ -29,23 +29,6 @@ WebGL.Pipeline = function(gl) {
 WebGL.Pipeline.prototype = Object.create(WebGL.Resource.prototype);
 WebGL.Pipeline.prototype.constructor = WebGL.Pipeline;
 
-WebGL.Pipeline.prototype.CreateShader = function(type, src) {
-  'use strict';
-
-  const gl = this.gl_;
-
-  let shader = gl.createShader(type);
-  gl.shaderSource(shader, src);
-  gl.compileShader(shader);
-
-  if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert('Compile shader failed.\n' + src + '\n + gl.getShaderInfoLog(shader)');
-    shader = null;
-  }
-
-  return shader;
-};
-
 WebGL.Pipeline.prototype.CreateVertexShader = function() {
   'use strict';
 
@@ -100,36 +83,6 @@ WebGL.Pipeline.prototype.CreateFragmentShader = function() {
   ].join('\n');
 
   return this.CreateShader(this.gl_.FRAGMENT_SHADER, src);
-};
-
-WebGL.Pipeline.prototype.CreateProgram = function(vs, fs)
-{
-  'use strict';
-
-  const gl = this.gl_;
-
-  let program = gl.createProgram();
-  gl.attachShader(program, vs);
-  gl.attachShader(program, fs);
-  gl.linkProgram(program);
-  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
-    alert('Prgram link failed.');
-    program = null;
-  }
-
-  return program;
-};
-
-WebGL.Pipeline.prototype.CreateBuffer = function(target, src, usage) {
-  'use strict';
-
-  const gl = this.gl_;
-
-  let buffer = gl.createBuffer();
-  gl.bindBuffer(target, buffer);
-  gl.bufferData(target, src, usage);
-
-  return buffer;
 };
 
 WebGL.Pipeline.prototype.FillVertices = function() {
@@ -282,6 +235,17 @@ WebGL.Pipeline.prototype.Run = function() {
   }
 
   const gl = this.gl_;
+
+  gl.enable(gl.DEPTH_TEST);
+  gl.depthFunc(gl.GREATER);
+
+  gl.disable(gl.CULL_FACE);
+  gl.frontFace(gl.CW);
+  gl.enable(gl.BLEND);
+  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+
+  gl.clearColor(0.25, 0.25, 0.75, 1);
+  gl.clearDepth(0);
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
