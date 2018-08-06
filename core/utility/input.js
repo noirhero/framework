@@ -31,7 +31,7 @@ function Input() {
   }
 
   /*
-  private functions
+  private functions - keyboard
   */
   function Keydown_(event) {
     var key_code = event.code;
@@ -76,6 +76,9 @@ function Input() {
     }
   }
 
+  /*
+  private functions - touch
+  */
   function TouchStart_(event){  
     
     ReleaseTouchInputState();

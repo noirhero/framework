@@ -40,7 +40,8 @@ Game.SceneSample.prototype.Initialize = function() {
   actor = this.ActorAssignmentInputArrow();
   actor.Initialize('data/textures/input_arrow.png');
   world_transform = actor.GetWorldTransform();
-  mat4.scale(world_transform, world_transform, [128, 128, 1]);
-
+  //actor.SetTranslate(0, 0);
+  //actor.SetRotate();
+  
   return true;
 };
