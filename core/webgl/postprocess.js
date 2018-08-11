@@ -8,7 +8,8 @@ WebGL.Postprocess = function(gl) {
   this.scene_width_ = 0;
   this.scene_height_ = 0;
   this.scene_texture_ = null;
-  this.scene_buffer_ = null;
+  this.scene_frame_buffer_ = null;
+  this.scene_depth_buffer_ = null;
 };
 
 WebGL.Postprocess.prototype = Object.create(WebGL.Resource.prototype);
@@ -18,13 +19,15 @@ WebGL.Postprocess.prototype.Initialize = function() {
   'use strict';
 
   this.CreateSceneTexture();
-  this.CreateSceneBuffer();
+  this.CreateFrameBuffer();
+  this.CreateDepthBuffer();
 };
 
 WebGL.Postprocess.prototype.OnContextLost = function() {
   'use strict';
 
-  this.scene_buffer_ = null;
+  this.scene_depth_buffer_ = null;
+  this.scene_frame_buffer_ = null;
   this.scene_texture_ = null;
 };
 
@@ -48,7 +51,7 @@ WebGL.Postprocess.prototype.CreateSceneTexture = function() {
   this.scene_texture_ = texture;
 };
 
-WebGL.Postprocess.prototype.CreateSceneBuffer = function() {
+WebGL.Postprocess.prototype.CreateFrameBuffer = function() {
   'ues strict;';
 
   const gl = this.gl_;
@@ -58,15 +61,26 @@ WebGL.Postprocess.prototype.CreateSceneBuffer = function() {
   gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.scene_texture_, 0);
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
 
-  this.scene_buffer_ = frame_buffer;
+  this.scene_frame_buffer_ = frame_buffer;
 };
 
-WebGL.Postprocess.prototype.CreateVertexBuffer = function() {
-  'use strict';
+WebGL.Postprocess.prototype.CreateDepthBuffer = function() {
+  'ues strict;';
 
   const gl = this.gl_;
+  const frame_buffer = this.scene_frame_buffer_;
 
-  gl.createVertexBuffer
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer);
+
+  let depth_buffer = gl.createRenderbuffer();
+  gl.bindRenderbuffer(gl.RENDERBUFFER, depth_buffer);
+  gl.renderbufferStorage(gl.RENDERBUFFER, gl.DEPTH_COMPONENT16, this.scene_width_, this.scene_height_);
+  gl.framebufferRenderbuffer(gl.FRAMEBUFFER, gl.DEPTH_ATTACHMENT, gl.RENDERBUFFER, depth_buffer);
+  gl.bindRenderbuffer(gl.RENDERBUFFER, null);
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, frame_buffer);
+
+  this.scene_depth_buffer_ = depth_buffer;
 };
 
 WebGL.Postprocess.prototype.Begin = function() {
@@ -79,16 +93,17 @@ WebGL.Postprocess.prototype.Begin = function() {
   if(width !== this.scene_width_ || height !== this.scene_height_) {
     this.CreateSceneTexture();
 
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scene_buffer_);
+    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scene_frame_buffer_);
     gl.framebufferTexture2D(gl.FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, this.scene_texture_, 0);
+
+    this.CreateDepthBuffer();
   }
-  else {
-    gl.bindFramebuffer(gl.FRAMEBUFFER, this.scene_buffer_);
-  }
+
+  gl.bindFramebuffer(gl.FRAMEBUFFER, this.scene_frame_buffer_);
 };
 
 WebGL.Postprocess.prototype.End = function() {
   'use strict';
 
-  this.gl_.bindFramebuffer(this.gl_.FRAMEBUFFER, this.scene_buffer_);
+  this.gl_.bindFramebuffer(this.gl_.FRAMEBUFFER, this.scene_frame_buffer_);
 };

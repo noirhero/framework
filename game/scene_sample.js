@@ -20,7 +20,6 @@ Game.SceneSample.prototype.Update = function() {
   this.timer_.Update();
 
   this.projection_.Update();
-  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
 
   const dt = this.timer_.GetDelta();
   const num_objects = this.actors_.length;
@@ -29,6 +28,7 @@ Game.SceneSample.prototype.Update = function() {
   }
 
   this.mono_filter_.Begin();
+  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
   this.mono_filter_.End();
 

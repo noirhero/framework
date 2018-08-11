@@ -105,8 +105,9 @@ WebGL.PostprocessMonoColor.prototype.CreateFragmentShader = function() {
     'varying vec2 out_tex_coord;',
 
     'void main() {',
-    ' gl_FragColor.rgb = texture2D(scene_color, out_tex_coord).rgb * 0.25;',
-    ' gl_FragColor.a = 1.0;',
+    ' vec4 color = texture2D(scene_color, out_tex_coord);',
+    ' float gray = 0.299 * color.r + 0.587 * color.g + 0.114 * color.b;',
+    ' gl_FragColor = vec4(vec3(gray), color.a);',
     '}',
   ].join('\n');
 
@@ -119,18 +120,6 @@ WebGL.PostprocessMonoColor.prototype.End = function() {
   const gl = this.gl_;
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-
-  gl.enable(gl.DEPTH_TEST);
-  gl.depthFunc(gl.GREATER);
-
-  gl.disable(gl.CULL_FACE);
-  gl.frontFace(gl.CW);
-  gl.enable(gl.BLEND);
-  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-  gl.clearColor(0.25, 0.25, 0.75, 1);
-  gl.clearDepth(0);
-
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   gl.useProgram(this.program_);

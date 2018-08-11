@@ -236,17 +236,6 @@ WebGL.Pipeline.prototype.Run = function() {
 
   const gl = this.gl_;
 
-  gl.enable(gl.DEPTH_TEST);
-  gl.depthFunc(gl.GREATER);
-
-  gl.disable(gl.CULL_FACE);
-  gl.frontFace(gl.CW);
-  gl.enable(gl.BLEND);
-  gl.blendFuncSeparate(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA, gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
-
-  gl.clearColor(0.25, 0.25, 0.75, 1);
-  gl.clearDepth(0);
-
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   const a_world_pos_ = this.a_world_pos_;
