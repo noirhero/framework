@@ -14,6 +14,7 @@ Game.Scene = function(context) {
   this.projection_ = null;
 
   this.pipeline_ = null;
+  this.pipeline_font_ = null;
   this.actors_ = [];
 
   this.col_scene_ = null;
@@ -72,7 +73,6 @@ Game.Scene.prototype.Update = function() {
   this.timer_.Update();
 
   this.projection_.Update();
-  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
 
   const dt = this.timer_.GetDelta();
   const num_objects = this.actors_.length;
@@ -80,5 +80,6 @@ Game.Scene.prototype.Update = function() {
     this.actors_[i].Update(dt);
   }
 
+  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
 };
