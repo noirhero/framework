@@ -5,7 +5,7 @@ Game.SceneSample = function(context) {
 
   Game.Scene.call(this, context);
 
-  this.mono_filter_ = null;
+  this.postprocess_ = null;
 
   this.player_ = null;
 };
@@ -27,10 +27,10 @@ Game.SceneSample.prototype.Update = function() {
     this.actors_[i].Update(dt);
   }
 
-  this.mono_filter_.Begin();
+  this.postprocess_.Begin();
   this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
-  this.mono_filter_.End();
+  this.postprocess_.End();
 
   const wtm = this.player_.GetWorldTransform();
   this.sound_mng_.UpdateListenerPos(wtm[12], wtm[13]);
@@ -46,7 +46,8 @@ Game.SceneSample.prototype.Initialize = function() {
 
   this.context_.SetTickFunction(this.Update.bind(this));
 
-  this.mono_filter_ = this.context_.CreatePostprocessMonoColor();
+  this.postprocess_ = this.context_.CreatePostprocess();
+  this.postprocess_.AddInstance(this.context_.CreateInstancePostprocessMonoColor());
 
   let world_transform = null;
   let actor = null;

@@ -1,9 +1,9 @@
 // Copyright TAP, Inc. All Rights Reserved.
 
-WebGL.PostprocessMonoColor = function(gl) {
+WebGL.InstancePostprocessMonoColor = function(gl) {
   'use strict';
 
-  WebGL.Postprocess.call(this, gl);
+  WebGL.InstancePostprocess.call(this, gl);
 
   this.vb_ = null;
   this.ib_ = null;
@@ -17,11 +17,11 @@ WebGL.PostprocessMonoColor = function(gl) {
   this.u_scene_color_ = null;
 };
 
-WebGL.PostprocessMonoColor.prototype = Object.create(WebGL.Postprocess.prototype);
-WebGL.PostprocessMonoColor.prototype.constructor = WebGL.PostprocessMonoColor;
+WebGL.InstancePostprocessMonoColor.prototype = Object.create(WebGL.InstancePostprocess.prototype);
+WebGL.InstancePostprocessMonoColor.prototype.constructor = WebGL.InstancePostprocessMonoColor;
 
-WebGL.PostprocessMonoColor.prototype.PostprocessInitialize = WebGL.Postprocess.prototype.Initialize;
-WebGL.PostprocessMonoColor.prototype.Initialize = function() {
+WebGL.InstancePostprocessMonoColor.prototype.PostprocessInitialize = WebGL.InstancePostprocess.prototype.Initialize;
+WebGL.InstancePostprocessMonoColor.prototype.Initialize = function() {
   'use strict';
 
   const gl = this.gl_;
@@ -40,8 +40,9 @@ WebGL.PostprocessMonoColor.prototype.Initialize = function() {
   this.program_ = program;
 };
 
-WebGL.PostprocessMonoColor.prototype.PostprocessOnContextLost = WebGL.Postprocess.prototype.OnContextLost;
-WebGL.PostprocessMonoColor.prototype.OnContextLost = function() {
+
+WebGL.InstancePostprocessMonoColor.prototype.PostprocessOnContextLost = WebGL.InstancePostprocess.prototype.OnContextLost;
+WebGL.InstancePostprocessMonoColor.prototype.OnContextLost = function() {
   'use strict';
 
   this.PostprocessOnContextLost();
@@ -54,7 +55,7 @@ WebGL.PostprocessMonoColor.prototype.OnContextLost = function() {
   this.program_ = null;
 };
 
-WebGL.PostprocessMonoColor.prototype.CreateVertexBuffer = function() {
+WebGL.InstancePostprocessMonoColor.prototype.CreateVertexBuffer = function() {
   'use strict';
 
   // x, y, tu, tv
@@ -68,7 +69,7 @@ WebGL.PostprocessMonoColor.prototype.CreateVertexBuffer = function() {
   this.vb_ = this.CreateBuffer(this.gl_.ARRAY_BUFFER, vertices, this.gl_.STATIC_DRAW);
 };
 
-WebGL.PostprocessMonoColor.prototype.CreateIndexBuffer = function() {
+WebGL.InstancePostprocessMonoColor.prototype.CreateIndexBuffer = function() {
   'use strict';
 
   const indices = new Uint16Array([0, 1, 2, 2, 1, 3]);
@@ -76,7 +77,7 @@ WebGL.PostprocessMonoColor.prototype.CreateIndexBuffer = function() {
   this.ib_ = this.CreateBuffer(this.gl_.ELEMENT_ARRAY_BUFFER, indices, this.gl_.STATIC_DRAW);
 };
 
-WebGL.PostprocessMonoColor.prototype.CreateVertexShader = function() {
+WebGL.InstancePostprocessMonoColor.prototype.CreateVertexShader = function() {
   'use strict';
 
   const src = [
@@ -94,7 +95,7 @@ WebGL.PostprocessMonoColor.prototype.CreateVertexShader = function() {
   this.vs_ = this.CreateShader(this.gl_.VERTEX_SHADER, src);
 };
 
-WebGL.PostprocessMonoColor.prototype.CreateFragmentShader = function() {
+WebGL.InstancePostprocessMonoColor.prototype.CreateFragmentShader = function() {
   'use strict';
 
   const src = [
@@ -114,18 +115,18 @@ WebGL.PostprocessMonoColor.prototype.CreateFragmentShader = function() {
   this.fs_ = this.CreateShader(this.gl_.FRAGMENT_SHADER, src);
 };
 
-WebGL.PostprocessMonoColor.prototype.End = function() {
+WebGL.InstancePostprocessMonoColor.prototype.Run = function(prev_result_texture) {
   'use strict';
 
   const gl = this.gl_;
 
-  gl.bindFramebuffer(gl.FRAMEBUFFER, null);
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.bindFramebuffer(gl.FRAMEBUFFER, this.result_frame_buffer_);
+  gl.clear(gl.COLOR_BUFFER_BIT);
 
   gl.useProgram(this.program_);
 
   gl.activeTexture(gl.TEXTURE0);
-  gl.bindTexture(gl.TEXTURE_2D, this.scene_texture_);
+  gl.bindTexture(gl.TEXTURE_2D, prev_result_texture);
 
   gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER, this.ib_);
   gl.bindBuffer(gl.ARRAY_BUFFER, this.vb_);

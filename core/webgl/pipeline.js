@@ -236,8 +236,6 @@ WebGL.Pipeline.prototype.Run = function() {
 
   const gl = this.gl_;
 
-  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
-
   const a_world_pos_ = this.a_world_pos_;
   const a_tex_coord_ = this.a_tex_coord_;
   const a_tex_index_ = this.a_tex_index_;
@@ -269,6 +267,9 @@ WebGL.Pipeline.prototype.Run = function() {
 
     gl.drawElements(gl.TRIANGLES, fill_index * CONST.INDEX_STRIDE_TWO_POLYGON, gl.UNSIGNED_SHORT, 0);
   }
+
+  gl.enable(gl.DEPTH_TEST);
+  gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   gl.useProgram(this.program_);
   gl.uniformMatrix4fv(u_vp_transform_, false, transform_vp_);
