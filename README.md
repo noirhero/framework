@@ -12,3 +12,6 @@
 ## To do
 1. Animation notify.
 2. Text rendering.
+3. Random tiled.
+4. Debug draw.
+5. Torch effect.
