@@ -5,6 +5,8 @@ Game.SceneSample = function(context) {
 
   Game.Scene.call(this, context);
 
+  this.font_ = null;
+  this.pipeline_font_ = null;
   this.postprocess_ = null;
 
   this.player_ = null;
@@ -30,6 +32,8 @@ Game.SceneSample.prototype.Update = function() {
   this.postprocess_.Begin();
   this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
+  this.pipeline_font_.UpdateViewProjection(this.camera_, this.projection_);
+  this.pipeline_font_.Run();
   this.postprocess_.End();
 
   const wtm = this.player_.GetWorldTransform();
@@ -46,6 +50,13 @@ Game.SceneSample.prototype.Initialize = function() {
 
   this.context_.SetTickFunction(this.Update.bind(this));
 
+  this.font_ = this.res_mng_.GetFont('data/fonts/font_kor.json', 'data/fonts/font_kor_sdf.png');
+  let font_instance = new WebGL.InstanceFont(this.font_);
+  font_instance.SetText('이');
+
+  this.pipeline_font_ = this.context_.CreatePipelineFont();
+  this.pipeline_font_.AddInstance(font_instance);
+
   this.postprocess_ = this.context_.CreatePostprocess();
   this.postprocess_.AddInstance(this.context_.CreateInstancePostprocessMonoColor());
 
@@ -61,7 +72,6 @@ Game.SceneSample.prototype.Initialize = function() {
   this.player_ = actor;
 
   actor = this.ActorAssignmentBackground();
-  //actor.Initialize('data/textures/sample_level.png');
   actor.Initialize('data/textures/dungeon_tile.png');
   world_transform = actor.GetWorldTransform();
   mat4.scale(world_transform, world_transform, [50, 50, 1]);

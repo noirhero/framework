@@ -5,6 +5,7 @@ function ResourceManager(context) {
 
   let textures_ = {};
   let animations_ = {};
+  let fonts_ = {};
 
   function CreateResource_(url, res_array, create_fn) {
     let resource = res_array[url];
@@ -44,6 +45,12 @@ function ResourceManager(context) {
     return animation;
   }
 
+  function CreateFont_(font_url, texture_url) {
+    let font = new WebGL.Font(font_url, texture_url, this);
+    font.Initialize();
+    return font;
+  }
+
   this.GetTexture = function(url) {
     return CreateResource_(url, textures_, CreateTexture_.bind(this, url));
   };
@@ -59,5 +66,14 @@ function ResourceManager(context) {
   this.DeleteAnimation = function(animation) {
     DeleteResource_(animation.GetTextureSrc(), textures_);
     DeleteResource_(animation, animations_);
+  };
+
+  this.GetFont = function(font_url, texture_url) {
+    return CreateResource_(font_url, fonts_, CreateFont_.bind(this, font_url, texture_url));
+  };
+
+  this.DeleteFont = function(font) {
+    DeleteResource_(font.GetTextureSrc(), textures_);
+    DeleteResource_(font.GetSrc(), fonts_);
   };
 }

@@ -2,6 +2,12 @@
 
 var CONST = CONST || {};
 
+CONST.ZERO_TEXCOORD = [
+  0.0, 0.0,
+  0.0, 0.0,
+  0.0, 0.0,
+  0.0, 0.0,
+];
 CONST.EMPTY_TEXCOORD = [
   0.0, 1.0,
   1.0, 1.0,

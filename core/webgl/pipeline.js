@@ -308,6 +308,7 @@ WebGL.Pipeline.prototype.Run = function() {
       if(CONST.NUM_MAX_TEXTURES <= num_bind_textures) {
         DrawElements_();
 
+        fill_index = 0;
         num_bind_textures = 0;
         bind_textures.length = 0;
         bind_texture_indices.length = 0;

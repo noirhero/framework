@@ -34,7 +34,7 @@ WebGL.Resource.prototype.CreateShader = function(type, src) {
   gl.compileShader(shader);
 
   if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
-    alert('Compile shader failed.\n' + src + '\n + gl.getShaderInfoLog(shader)');
+    alert('Compile shader failed.\n' + src + '\n' + gl.getShaderInfoLog(shader));
     shader = null;
   }
 

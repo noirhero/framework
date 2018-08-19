@@ -81,6 +81,10 @@ function Context() {
     return InitializeAndInsertResource(new WebGL.Pipeline(gl_), gl_resources_);
   };
 
+  this.CreatePipelineFont = function() {
+    return InitializeAndInsertResource(new WebGL.PipelineFont(gl_), gl_resources_);
+  };
+
   this.CreatePostprocess = function() {
     return InitializeAndInsertResource(new WebGL.Postprocess(gl_), gl_resources_);
   };

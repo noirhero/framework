@@ -35,9 +35,9 @@ WebGL.Font.prototype.Initialize = function() {
       ];
     }
 
-    this.font_infors_ = font_infos;
+    this.font_infos_ = font_infos;
   }
-  ReadFile(this.fonr_url_, OnLoadFontInfo_.bind(this));
+  ReadFile(this.font_url_, OnLoadFontInfo_.bind(this));
 
   this.font_texture_ = this.res_mng_.GetTexture(this.texture_url_);
 };
@@ -45,9 +45,14 @@ WebGL.Font.prototype.Initialize = function() {
 WebGL.Font.prototype.GetCoordinate = function(ch) {
   'use strict';
 
-  const font_info = this.font_infos_[ch];
+  const font_infos = this.font_infos_;
+  if(!font_infos) {
+    return CONST.ZERO_TEXCOORD;
+  }
+
+  const font_info = font_infos[ch];
   if(!font_info) {
-    return CONST.EMPTY_TEXCOORD;
+    return CONST.ZERO_TEXCOORD;
   }
 
   return font_info.rect;
