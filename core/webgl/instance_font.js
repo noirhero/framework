@@ -42,6 +42,8 @@ WebGL.InstanceFont.prototype.FillVertices = function(offset, dest_vertices, quad
   const w = font_info.w;
   const h = font_info.h;
 
+  let fill_count = 0;
+
   const font = this.font_;
   for(let ti = 0; ti < num_text; ++ti) {
     const ch = text[ti];
@@ -50,8 +52,8 @@ WebGL.InstanceFont.prototype.FillVertices = function(offset, dest_vertices, quad
       continue;
     }
     else if('\n' === ch) {
-      x = font.x;
-      y += h;
+      x = font_info.x;
+      y -= h;
       continue;
     }
 
@@ -86,8 +88,9 @@ WebGL.InstanceFont.prototype.FillVertices = function(offset, dest_vertices, quad
     dest_vertices[offset++] = tex_coord[7];
     dest_vertices[offset++] = texture_index;
 
-    x += w + 10;
+    x += w;
+    ++fill_count;
   }
 
-  return num_text;
+  return fill_count;
 };

@@ -18,24 +18,7 @@ WebGL.Font.prototype.Initialize = function() {
   'use strict';
 
   function OnLoadFontInfo_(json_text) {
-    let font_infos = JSON.parse(json_text);
-
-    for(let i in font_infos) {
-      let font_info = font_infos[i];
-
-      const left = font_info.x;
-      const top = 1.0 - font_info.y;
-      const right = left + font_info.w;
-      const bottom = top - font_info.h;
-      font_info.rect = [
-        left, top,
-        right, top,
-        left, bottom,
-        right, bottom,
-      ];
-    }
-
-    this.font_infos_ = font_infos;
+    this.font_infos_ = JSON.parse(json_text);
   }
   ReadFile(this.font_url_, OnLoadFontInfo_.bind(this));
 

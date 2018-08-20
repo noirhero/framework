@@ -52,7 +52,7 @@ Game.SceneSample.prototype.Initialize = function() {
 
   this.font_ = this.res_mng_.GetFont('data/fonts/font_kor.json', 'data/fonts/font_kor_sdf.png');
   let font_instance = new WebGL.InstanceFont(this.font_);
-  font_instance.SetText('이');
+  font_instance.SetText('이난호\n김현정\n주혜리');
 
   this.pipeline_font_ = this.context_.CreatePipelineFont();
   this.pipeline_font_.AddInstance(font_instance);
