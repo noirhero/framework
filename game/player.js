@@ -19,6 +19,11 @@ Game.Player = function(res_mng, pipeline, col_scene) {
 Game.Player.prototype = Object.create(Game.Pawn.prototype);
 Game.Player.prototype.constructor = Game.Player;
 
+Game.Player.prototype.SetUIArrow = function(ui) {
+  'use strict';
+  this.input_arrow_ = ui;
+};
+
 Game.Player.prototype.PawnInitialize = Game.Pawn.prototype.Initialize;
 Game.Player.prototype.Initialize = function(url) {
   'use strict';
@@ -27,8 +32,6 @@ Game.Player.prototype.Initialize = function(url) {
 
   this.input_ = new Input();
   this.input_.Initialize();
-
-  this.input_arrow_ = Game.InputArrow;
 
   return true;
 };
@@ -135,21 +138,39 @@ Game.Player.prototype.Update = function(dt) {
     this.col_scene_.Test(this.col_shape_);
   }
 
-  ChangeInputState.call(this);
-  CalcVelocity.call(this, dt);
-  Moving.call(this);
-
   /*
   private functions - touch
   */
-  function ChangeTouchInputState() {
+  function ChangeTouchInputState() {  
+    let input_ = this.input_;
+    if(input_.IsDownTouch()){
+      let input_enum_ = this.input_.input_enum;
+      let degree_ = 0;
+      if(input_.IsTouchState(input_enum_.KeyUp)){
+        degree_ = 0;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyLeft)){
+        degree_ = 90;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyDown)){
+        degree_ = 180;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyRight)){
+        degree_ = 270;
+      }
+  
+      this.input_arrow_.Show(degree_, input_.GetTouchLocation());
+    }
+    else if(input_.IsTouchMoving()){
+      input_.CleanUpTouchMoveData();
+    }
+    else{      
+      this.input_arrow_.Hide();
+    }
   }
 
-  function TouchMoving() {
-    //input_arrow_.SetTranslate(0,0);
-    //this.input_arrow_.SetTranslate(0,0);
-  }
-
+  ChangeInputState.call(this);
+  CalcVelocity.call(this, dt);
+  Moving.call(this);
   ChangeTouchInputState.call(this);
-  TouchMoving.call(this);
-};
+}

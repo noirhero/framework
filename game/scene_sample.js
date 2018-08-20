@@ -19,12 +19,17 @@ Game.SceneSample.prototype.Initialize = function() {
 
   let world_transform = null;
   let actor = null;
+  
+  let ui_arrow_ = null;
+  ui_arrow_ = this.ActorAssignmentInputArrow();
+  ui_arrow_.Initialize('data/textures/input_arrow.png');
 
   actor = this.ActorAssignmentPlayer();
   actor.Initialize('data/animations/skeleton.json');
   world_transform = actor.GetWorldTransform();
   mat4.scale(world_transform, world_transform, [100, 50, 1]);
   actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
+  actor.SetUIArrow(ui_arrow_);
 
   actor = this.ActorAssignmentBackground();
   actor.Initialize('data/textures/sample_level.png');
@@ -36,12 +41,6 @@ Game.SceneSample.prototype.Initialize = function() {
   world_transform = actor.GetWorldTransform();
   mat4.scale(world_transform, world_transform, [100, 50, 1]);
   actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
-
-  actor = this.ActorAssignmentInputArrow();
-  actor.Initialize('data/textures/input_arrow.png');
-  world_transform = actor.GetWorldTransform();
-  //actor.SetTranslate(0, 0);
-  //actor.SetRotate();
   
   return true;
 };
