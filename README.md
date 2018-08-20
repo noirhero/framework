@@ -12,3 +12,6 @@
 ## To do
 1. Animation notify.
 2. Text rendering.
+
+## Document
+https://docs.google.com/document/d/15CQwQQZHABQFm4c2Mz3HUYkgfuwauotJqxtdacJGtPQ/edit?usp=sharing
