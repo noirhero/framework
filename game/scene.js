@@ -62,7 +62,7 @@ Game.Scene.prototype.Initialize = function() {
 
   this.col_scene_ = new Game.CollisionScene();
   this.sound_mng_ = new SoundManager();
- // this.sound_mng_.Generate('data/sounds/quiet_hill').Play().Loop(true);
+  this.sound_mng_.Generate('data/sounds/quiet_hill').Play().Loop(true);
 
   this.timer_.Start();
   return true;

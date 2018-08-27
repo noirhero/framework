@@ -36,17 +36,7 @@ Game.Pawn.prototype.Initialize = function(url) {
   this.instance_ = instance;
   this.col_shape_ = this.col_scene_.AssignementDynamic(instance, 20);
 
-  //this.debug_drawer_.DrawBound(this.col_shape_);
-
-  this.debug_drawer_.DrawCircle([50, 50], 20);
-  this.debug_drawer_.DrawCircle([20, 50], 20);
-
-  // this.debug_drawer_.DrawBox([50, 50], 50, 50);
-  // this.debug_drawer_.DrawBox([0, 150], 20, 80);
-  // this.debug_drawer_.DrawBox([-30, -50], 40, 60);
-
-  // this.debug_drawer_.DrawLine([50, 50], [0, 0]);
-  // this.debug_drawer_.DrawLine([30, 50], [100, 70]);
+  this.debug_drawer_.DrawBound(this.col_shape_);
 };
 
 Game.Pawn.prototype.Update = function(dt) {

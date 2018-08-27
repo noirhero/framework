@@ -133,7 +133,12 @@ WebGL.DebugDrawer.prototype.Run = function() {
 
     for(let i = 0; i < num_boxes; ++i) {
       let fill_index = 0;
-      let world_transform_ = boxes[i].GetWorldTransform();
+      let wtm = boxes[i].instance.GetWorldTransform();
+      let world_transform_ = mat4.create();
+      world_transform_[12] = wtm[12];
+      world_transform_[13] = wtm[13];
+      world_transform_[0] = boxes[i].width;
+      world_transform_[5] = boxes[i].height;
       
       for(let j = 0; j < CONST.QUAD_STRIDE; ++j) {
         vec3.transformMat4(world_position_, quad_position[j], world_transform_);
@@ -165,17 +170,31 @@ WebGL.DebugDrawer.prototype.Run = function() {
       return;
     }
 
-    let fill_index = 0;
-    const seg_radian = ((360 / CONST.DRAW_CIRCLE_SEGMENTS) / 180) * Math.PI;
+    const radian_segments = ((360 / CONST.DRAW_CIRCLE_SEGMENTS) / 180) * Math.PI;
 
     for(let i = 0; i < num_circles; ++i) {
+      let fill_index = 0;
+      let world_transform_ = mat4.create();
       let radius = circles[i].radius;
 
       for(let j = 0; j < CONST.DRAW_CIRCLE_SEGMENTS; ++j) {
-        let world_transform_ = circles[i].instance.GetWorldTransform();
+        let center = vec2.create();
 
-        world_transform_[12] += Math.sin(seg_radian * j) * radius;
-        world_transform_[13] += Math.cos(seg_radian * j) * radius;
+        if(circles[i].instance) {
+          let wtm = circles[i].instance.GetWorldTransform();
+          center[0] = wtm[12];
+          center[1] = wtm[13];
+        }
+        else if(circles[i].center) {
+          center[0] = circles[i].center[0];
+          center[1] = circles[i].center[1];
+        }
+        
+        let start_point_x = center[0] - (radius * 0.5);
+        let start_point_y = center[1];
+
+        world_transform_[12] = start_point_x + Math.sin(radian_segments * j) * radius;
+        world_transform_[13] = start_point_y + Math.cos(radian_segments * j) * radius;
 
         vertices_[fill_index++] = world_transform_[12];
         vertices_[fill_index++] = world_transform_[13];
@@ -251,16 +270,21 @@ WebGL.DebugDrawer.prototype.Run = function() {
     }
 
     for(let i = 0; i < bounds.length; ++i) {
-      if(!bounds[i] || (true === bounds[i].dirty_)) {
+      if(!bounds[i] || !bounds[i].box_) {
         continue;
       }
 
+      // create new box
       let new_box_instance = new WebGL.Instance();
       new_box_instance.world_transform_ = bounds[i].instance_.GetWorldTransform();
-    
-      let boxes = debug_drawer.boxes_;
-      boxes.push(new_box_instance);
+      let w = bounds[i].box_.points[1].x;
+      let h = bounds[i].box_.points[2].y;
+      let new_box = {instance: new_box_instance, width: w, height: h};
 
+      let boxes = debug_drawer.boxes_;
+      boxes.push(new_box);
+
+      // create new circle
       if(bounds[i].sphere_) {
         let new_circle_instance = new WebGL.Instance();
         new_circle_instance.world_transform_ = bounds[i].instance_.GetWorldTransform();
@@ -272,17 +296,12 @@ WebGL.DebugDrawer.prototype.Run = function() {
         circles.push(new_circle);
       }
 
-      // Remove element
+      // Remove reservated element
       bounds.splice(i, 1);
       --i;
     }
   }
 
-  
-
-
- 
- 
 //  const u_color_ = this.u_color_;
 };
 
@@ -294,10 +313,17 @@ WebGL.DebugDrawer.prototype.DrawBox = function(pos, w, h) {
   let wtm = new_instance.GetWorldTransform();
   wtm[12] = pos[0];
   wtm[13] = pos[1];
-  wtm[0] = w;
-  wtm[5] = h;
 
-  this.boxes_.push(new_instance);
+  let new_box = {instance: new_instance, width: w, height: h};
+
+  this.boxes_.push(new_box);
+}
+
+WebGL.DebugDrawer.prototype.DrawCircle = function(center, radius) {
+  'use strict';
+
+  let new_circle = {center: center, radius: radius};
+  this.circles_.push(new_circle);
 }
 
 WebGL.DebugDrawer.prototype.DrawLine = function(start, end) {
@@ -307,18 +333,6 @@ WebGL.DebugDrawer.prototype.DrawLine = function(start, end) {
   this.lines_.push(new_line);
 }
 
-WebGL.DebugDrawer.prototype.DrawCircle = function(center, radius) {
-  'use strict';
-
-  let new_instance = new WebGL.Instance();
-  let wtm = new_instance.GetWorldTransform();
-  wtm[12] = center[0];
-  wtm[13] = center[1];
-
-  let new_circle = {instance: new_instance, radius: radius};
-  this.circles_.push(new_circle);
-}
-
 WebGL.DebugDrawer.prototype.DrawBound = function(bound) {
   'use strict';
 
@@ -326,7 +340,17 @@ WebGL.DebugDrawer.prototype.DrawBound = function(bound) {
 }
 
 WebGL.DebugDrawer.prototype.ClearAllBox = function() {
-  'use strict';
-
   this.boxes_ = [];
+}
+
+WebGL.DebugDrawer.prototype.ClearAllCircle = function() {
+  this.circles_ = [];
+}
+
+WebGL.DebugDrawer.prototype.ClearAllLine = function() {
+  this.lines_ = [];
+}
+
+WebGL.DebugDrawer.prototype.ClearAllBound = function() {
+  this.bounds_ = [];
 }
