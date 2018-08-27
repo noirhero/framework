@@ -31,7 +31,7 @@ function Input() {
   }
 
   /*
-  private functions
+  private functions - keyboard
   */
   function Keydown_(event) {
     var key_code = event.code;
@@ -76,6 +76,9 @@ function Input() {
     }
   }
 
+  /*
+  private functions - touch
+  */
   function TouchStart_(event){  
     
     ReleaseTouchInputState();
@@ -114,19 +117,31 @@ function Input() {
       let calculateX = inTarget.x - inPivot.x;
       let calculateY = inTarget.y - inPivot.y;
       
-      vec2.set(input_direction_, 0, 0);
+      let absX = Math.abs(calculateX);
+      let absY = Math.abs(calculateY);
 
-      if(calculateX < 0) {
+      if(absX == 0 && absY == 0)
+        return;
+
+      vec2.set(input_direction_, 0, 0);
+      input_state_ = 0;
+
+      let vertical = absX < absY;
+      if(!vertical && calculateX < 0) {
         input_direction_[0] = -1;
+        input_state_ = input_enum_.KeyLeft; 
       }
-      if(calculateX > 0) {
+      else if(!vertical && calculateX > 0) {
         input_direction_[0] = 1;
+        input_state_ = input_enum_.KeyRight; 
       }
-      if(calculateY < 0) {
+      else if(vertical && calculateY < 0) {
         input_direction_[1] = 1;
+        input_state_ = input_enum_.KeyUp; 
       }
-      if(calculateY > 0) {
+      else if(vertical &&calculateY > 0) {
         input_direction_[1] = -1;
+        input_state_ = input_enum_.KeyDown; 
       }
     }
   }
@@ -134,6 +149,7 @@ function Input() {
   function ReleaseTouchInputState() {
     vec2.set(input_direction_, 0, 0);
     input_touch_stack.length = 0;
+    input_state_ = 0;
   }
 
   /*

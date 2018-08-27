@@ -6,6 +6,7 @@ Game.Player = function(res_mng, pipeline, col_scene, debug_drawer) {
   Game.Pawn.call(this, res_mng, pipeline, col_scene, debug_drawer);
 
   this.input_ = null;
+  this.input_arrow_ = null;
 
   this.state_ = 'idle';
   this.direction_ = '_l';
@@ -27,6 +28,8 @@ Game.Player.prototype.Initialize = function(url) {
   this.input_ = new Input();
   this.input_.Initialize();
 
+  this.input_arrow_ = Game.InputArrow;
+
   return true;
 };
 
@@ -41,6 +44,9 @@ Game.Player.prototype.Update = function(dt) {
     this.instance_.SetState(this.state_);
   }
 
+  /*
+  private functions - keyboard
+  */
   function ChangeInputState() {
     let input_direction_ = this.input_.GetInputDirection();
     let input_enum_ = this.input_.input_enum;
@@ -132,4 +138,18 @@ Game.Player.prototype.Update = function(dt) {
   ChangeInputState.call(this);
   CalcVelocity.call(this, dt);
   Moving.call(this);
+
+  /*
+  private functions - touch
+  */
+  function ChangeTouchInputState() {
+  }
+
+  function TouchMoving() {
+    //input_arrow_.SetTranslate(0,0);
+    //this.input_arrow_.SetTranslate(0,0);
+  }
+
+  ChangeTouchInputState.call(this);
+  TouchMoving.call(this);
 };

@@ -33,6 +33,10 @@ Game.Scene.prototype.ActorAssignmentBackground = function() {
   return this.actors_[this.actors_.length] = new Game.Background(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
+Game.Scene.prototype.ActorAssignmentInputArrow = function() {
+  return this.actors_[this.actors_.length] = new Game.InputArrow(this.res_mng_, this.pipeline_, this.col_scene_);
+};
+
 Game.Scene.prototype.ActorRelease = function(actor) {
   actor.Release();
 
@@ -147,6 +151,10 @@ function Scene(context) {
 
   this.ActorAssignmentBackground = function() {
     return actors_[actors_.length] = new Game.Background(res_mng_, pipeline_, col_scene_, debug_drawer_);
+  };
+
+  this.ActorAssignmentInputArrow = function() {
+    return actors_[actors_.length] = new Game.InputArrow(res_mng_, pipeline_, col_scene_);
   };
 
   this.ActorAssignment = function() {
