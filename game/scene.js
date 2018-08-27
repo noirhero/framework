@@ -14,6 +14,7 @@ Game.Scene = function(context) {
   this.projection_ = null;
 
   this.pipeline_ = null;
+  this.debug_drawer_ = null;
   this.actors_ = [];
 
   this.col_scene_ = null;
@@ -21,15 +22,15 @@ Game.Scene = function(context) {
 };
 
 Game.Scene.prototype.ActorAssignmentPlayer = function() {
-  return this.actors_[this.actors_.length] = new Game.Player(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Player(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
 Game.Scene.prototype.ActorAssignmentPawn = function() {
-  return this.actors_[this.actors_.length] = new Game.Pawn(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Pawn(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
 Game.Scene.prototype.ActorAssignmentBackground = function() {
-  return this.actors_[this.actors_.length] = new Game.Background(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Background(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
 Game.Scene.prototype.ActorAssignmentInputArrow = function() {
@@ -61,6 +62,7 @@ Game.Scene.prototype.Initialize = function() {
   this.projection_ = new Projection();
 
   this.pipeline_ = context.CreatePipeline();
+  this.debug_drawer_ = context.CreateDebugDrawer();
 
   this.col_scene_ = new Game.CollisionScene();
   this.sound_mng_ = new SoundManager();
@@ -77,6 +79,7 @@ Game.Scene.prototype.Update = function() {
 
   this.projection_.Update();
   this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
+  this.debug_drawer_.UpdateViewProjection(this.camera_, this.projection_);
 
   const dt = this.timer_.GetDelta();
   const num_objects = this.actors_.length;
@@ -85,6 +88,7 @@ Game.Scene.prototype.Update = function() {
   }
 
   this.pipeline_.Run();
+  this.debug_drawer_.Run();
 };
 
 function Scene(context) {
@@ -104,10 +108,12 @@ function Scene(context) {
 
     projection_.Update();
     pipeline_.UpdateViewProjection(camera_, projection_);
+    debug_drawer_.UpdateViewProjection(camera_, projection_);
 
     Updateactors_(timer_.GetDelta());
 
     pipeline_.Run();
+    debug_drawer_.Run();
   }
 
   this.Initialize = function() {
@@ -121,6 +127,7 @@ function Scene(context) {
     projection_ = new Projection();
 
     pipeline_ = context.CreatePipeline();
+    debug_drawer_ = context.CreateDebugDrawer();
 
     col_scene_ = new Game.CollisionScene();
     sound_mng_ = new SoundManager();
@@ -135,15 +142,15 @@ function Scene(context) {
   };
 
   this.ActorAssignmentPlayer = function() {
-    return actors_[actors_.length] = new Game.Player(res_mng_, pipeline_, col_scene_);
+    return actors_[actors_.length] = new Game.Player(res_mng_, pipeline_, col_scene_, debug_drawer_);
   };
 
   this.ActorAssignmentPawn = function() {
-    return actors_[actors_.length] = new Game.Pawn(res_mng_, pipeline_, col_scene_);
+    return actors_[actors_.length] = new Game.Pawn(res_mng_, pipeline_, col_scene_, debug_drawer_);
   };
 
   this.ActorAssignmentBackground = function() {
-    return actors_[actors_.length] = new Game.Background(res_mng_, pipeline_, col_scene_);
+    return actors_[actors_.length] = new Game.Background(res_mng_, pipeline_, col_scene_, debug_drawer_);
   };
 
   this.ActorAssignmentInputArrow = function() {
@@ -151,7 +158,7 @@ function Scene(context) {
   };
 
   this.ActorAssignment = function() {
-    return actors_[actors_.length] = new Actor(res_mng_, pipeline_, col_scene_);
+    return actors_[actors_.length] = new Actor(res_mng_, pipeline_, col_scene_, debug_drawer_);
   };
 
   this.ActorRelease = function(actor) {

@@ -284,6 +284,7 @@ WebGL.Pipeline.prototype.Run = function() {
   const gl = this.gl_;
 
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
+  gl.enable(gl.DEPTH_TEST);
 
   const a_world_pos_ = this.a_world_pos_;
   const a_tex_coord_ = this.a_tex_coord_;
