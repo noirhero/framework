@@ -1,11 +1,12 @@
 // Copyright, TAP, Inc. All Rights Reserved.
 
-Game.Player = function(res_mng, pipeline, col_scene) {
+Game.Player = function(res_mng, pipeline, col_scene, debug_drawer) {
   'use strict';
 
-  Game.Pawn.call(this, res_mng, pipeline, col_scene);
+  Game.Pawn.call(this, res_mng, pipeline, col_scene, debug_drawer);
 
   this.input_ = null;
+  this.input_arrow_ = null;
 
   this.state_ = 'idle';
   this.direction_ = '_l';
@@ -17,6 +18,11 @@ Game.Player = function(res_mng, pipeline, col_scene) {
 
 Game.Player.prototype = Object.create(Game.Pawn.prototype);
 Game.Player.prototype.constructor = Game.Player;
+
+Game.Player.prototype.SetUIArrow = function(ui) {
+  'use strict';
+  this.input_arrow_ = ui;
+};
 
 Game.Player.prototype.PawnInitialize = Game.Pawn.prototype.Initialize;
 Game.Player.prototype.Initialize = function(url) {
@@ -41,6 +47,9 @@ Game.Player.prototype.Update = function(dt) {
     this.instance_.SetState(this.state_);
   }
 
+  /*
+  private functions - keyboard
+  */
   function ChangeInputState() {
     let input_direction_ = this.input_.GetInputDirection();
     let input_enum_ = this.input_.input_enum;
@@ -129,7 +138,39 @@ Game.Player.prototype.Update = function(dt) {
     this.col_scene_.Test(this.col_shape_);
   }
 
+  /*
+  private functions - touch
+  */
+  function ChangeTouchInputState() {  
+    let input_ = this.input_;
+    if(input_.IsDownTouch()){
+      let input_enum_ = this.input_.input_enum;
+      let degree_ = 0;
+      if(input_.IsTouchState(input_enum_.KeyUp)){
+        degree_ = 0;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyLeft)){
+        degree_ = 90;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyDown)){
+        degree_ = 180;
+      }
+      else if(input_.IsTouchState(input_enum_.KeyRight)){
+        degree_ = 270;
+      }
+  
+      this.input_arrow_.Show(degree_, input_.GetTouchLocation());
+    }
+    else if(input_.IsTouchMoving()){
+      input_.CleanUpTouchMoveData();
+    }
+    else{      
+      this.input_arrow_.Hide();
+    }
+  }
+
   ChangeInputState.call(this);
   CalcVelocity.call(this, dt);
   Moving.call(this);
-};
+  ChangeTouchInputState.call(this);
+}

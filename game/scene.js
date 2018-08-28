@@ -15,6 +15,9 @@ Game.Scene = function(context) {
 
   this.pipeline_ = null;
   this.pipeline_font_ = null;
+
+  this.debug_drawer_ = null;
+
   this.actors_ = [];
 
   this.col_scene_ = null;
@@ -22,15 +25,19 @@ Game.Scene = function(context) {
 };
 
 Game.Scene.prototype.ActorAssignmentPlayer = function() {
-  return this.actors_[this.actors_.length] = new Game.Player(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Player(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
 Game.Scene.prototype.ActorAssignmentPawn = function() {
-  return this.actors_[this.actors_.length] = new Game.Pawn(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Pawn(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
 };
 
 Game.Scene.prototype.ActorAssignmentBackground = function() {
-  return this.actors_[this.actors_.length] = new Game.Background(this.res_mng_, this.pipeline_, this.col_scene_);
+  return this.actors_[this.actors_.length] = new Game.Background(this.res_mng_, this.pipeline_, this.col_scene_, this.debug_drawer_);
+};
+
+Game.Scene.prototype.ActorAssignmentInputArrow = function() {
+  return this.actors_[this.actors_.length] = new Game.InputArrow(this.res_mng_, this.pipeline_, this.col_scene_);
 };
 
 Game.Scene.prototype.ActorRelease = function(actor) {
@@ -58,6 +65,7 @@ Game.Scene.prototype.Initialize = function() {
   this.projection_ = new Projection();
 
   this.pipeline_ = context.CreatePipeline();
+  this.debug_drawer_ = context.CreateDebugDrawer();
 
   this.col_scene_ = new Game.CollisionScene();
   this.sound_mng_ = new SoundManager();
@@ -73,6 +81,8 @@ Game.Scene.prototype.Update = function() {
   this.timer_.Update();
 
   this.projection_.Update();
+  this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
+  this.debug_drawer_.UpdateViewProjection(this.camera_, this.projection_);
 
   const dt = this.timer_.GetDelta();
   const num_objects = this.actors_.length;
@@ -82,4 +92,5 @@ Game.Scene.prototype.Update = function() {
 
   this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
+  this.debug_drawer_.Run();
 };

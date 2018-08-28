@@ -30,8 +30,30 @@ function Input() {
     return input_direction_;
   }
 
+  this.IsTouchState = function(key) {
+    return (touch_state_ & key) ? true : false;
+  }
+
+  this.GetTouchLocation = function() {
+    return touch_location;
+  }
+
+  this.IsDownTouch = function() {
+    return input_touch_stack.length != 0;
+  }
+  
+  this.IsTouchMoving = function() {
+    return pending_touch_moving_;
+  }
+  
+  this.CleanUpTouchMoveData = function()
+  {
+    vec2.set(input_direction_, 0, 0);
+    pending_touch_moving_ = false;
+  }
+
   /*
-  private functions
+  private functions - keyboard
   */
   function Keydown_(event) {
     var key_code = event.code;
@@ -43,7 +65,7 @@ function Input() {
     case 'Space':      { input_state_ |= input_enum_.SpaceBar; } break;
     }
 
-    SetInputDirection();
+    SetInputDirection(1);
   }
 
   function Keyup_(event) {
@@ -56,45 +78,44 @@ function Input() {
     case 'Space':      { input_state_ &= ~input_enum_.SpaceBar; } break;
     }
 
-    SetInputDirection();
+    SetInputDirection(1);
   }
 
-  function SetInputDirection() {
+  function SetInputDirection(speed) {
     vec2.set(input_direction_, 0, 0);
 
     if(input_state_ & input_enum_.KeyLeft) {
-      input_direction_[0] += -1;
+      input_direction_[0] += -1 * speed;
     }
     if(input_state_ & input_enum_.KeyRight) {
-      input_direction_[0] -= -1;
+      input_direction_[0] -= -1 * speed;
     }
     if(input_state_ & input_enum_.KeyUp) {
-      input_direction_[1] -= -1;
+      input_direction_[1] -= -1 * speed;
     }
     if(input_state_ & input_enum_.KeyDown) {
-      input_direction_[1] -= 1;
+      input_direction_[1] -= 1 * speed; 
     }
   }
 
-  function TouchStart_(event){  
-    
+  /*
+  private functions - touch
+  */
+  function TouchStart_(event){      
+    touch_location = { x: event.changedTouches[0].clientX, y : event.changedTouches[0].clientY};
     ReleaseTouchInputState();
   }
 
-  function TouchEnd_(event){
-
+  function TouchEnd_(event){    
     ReleaseTouchInputState();
   }
 
   function TouchCancel_(event){
-
     ReleaseTouchInputState();
   }
 
   function TouchMove_(event){
-
     let cached_touches = event.changedTouches;
-    
     for(let i=0; i<cached_touches.length; i++) {
       input_touch_stack.push({
         x : cached_touches[i].screenX,
@@ -114,34 +135,53 @@ function Input() {
       let calculateX = inTarget.x - inPivot.x;
       let calculateY = inTarget.y - inPivot.y;
       
-      vec2.set(input_direction_, 0, 0);
+      let absX = Math.abs(calculateX);
+      let absY = Math.abs(calculateY);
 
-      if(calculateX < 0) {
-        input_direction_[0] = -1;
+      if(absX == 0 && absY == 0)
+        return;
+
+      vec2.set(input_direction_, 0, 0);
+      touch_state_ = 0;
+
+      let vertical = absX < absY;
+      if(!vertical && calculateX < 0) {
+        touch_state_ = input_enum_.KeyLeft; 
       }
-      if(calculateX > 0) {
-        input_direction_[0] = 1;
+      else if(!vertical && calculateX > 0) {
+        touch_state_ = input_enum_.KeyRight; 
       }
-      if(calculateY < 0) {
-        input_direction_[1] = 1;
+      else if(vertical && calculateY < 0) {
+        touch_state_ = input_enum_.KeyUp; 
       }
-      if(calculateY > 0) {
-        input_direction_[1] = -1;
+      else if(vertical &&calculateY > 0) {
+        touch_state_ = input_enum_.KeyDown; 
       }
+
+      //
+      pending_touch_moving_ = false;
     }
   }
   
-  function ReleaseTouchInputState() {
-    vec2.set(input_direction_, 0, 0);
+  function ReleaseTouchInputState() {    
+    pending_touch_moving_ = true;
+    input_state_ = touch_state_;
+    
+    SetInputDirection(100);
+
     input_touch_stack.length = 0;
+    touch_state_ = 0;
   }
 
   /*
   private variables
-  */
+  */ 
+  var pending_touch_moving_;
+  var touch_state_ = 0;
   var input_state_ = 0;
   var input_direction_ = vec2.create();
   var input_touch_stack = [];
+  var touch_location = vec2.create();
   const input_enum_ = {KeyLeft: 1, KeyRight: 2, KeyUp: 4, KeyDown: 8, SpaceBar: 16};
 
   this.input_enum = input_enum_;

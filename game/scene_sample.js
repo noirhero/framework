@@ -35,6 +35,8 @@ Game.SceneSample.prototype.Update = function() {
   this.pipeline_font_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_font_.Run();
   this.postprocess_.End();
+  this.debug_drawer_.UpdateViewProjection(this.camera_, this.projection_);
+  this.debug_drawer_.Run();
 
   const wtm = this.player_.GetWorldTransform();
   this.sound_mng_.UpdateListenerPos(wtm[12], wtm[13]);
@@ -63,11 +65,16 @@ Game.SceneSample.prototype.Initialize = function() {
   let world_transform = null;
   let actor = null;
 
+  let ui_arrow_ = null;
+  ui_arrow_ = this.ActorAssignmentInputArrow();
+  ui_arrow_.Initialize('data/textures/input_arrow.png');
+
   actor = this.ActorAssignmentPlayer();
   actor.Initialize('data/animations/skeleton.json');
   world_transform = actor.GetWorldTransform();
   mat4.scale(world_transform, world_transform, [100, 50, 1]);
   actor.SetTranslate(Math.RandomRanged(-200, 200), Math.RandomRanged(-50, 50));
+  actor.SetUIArrow(ui_arrow_);
 
   this.player_ = actor;
 

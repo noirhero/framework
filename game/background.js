@@ -1,9 +1,9 @@
 // Copyright TAP, Inc. All Rights Reserved.
 
-Game.Background = function(res_mng, pipeline, col_scene) {
+Game.Background = function(res_mng, pipeline, col_scene, debug_drawer) {
   'use strict';
 
-  Game.Actor.call(this, res_mng, pipeline, col_scene);
+  Game.Actor.call(this, res_mng, pipeline, col_scene, debug_drawer);
 
   this.instance_ = null;
 };

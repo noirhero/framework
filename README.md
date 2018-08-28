@@ -10,8 +10,8 @@
 6. howler https://github.com/goldfire/howler.js
 
 ## To do
-1. Animation notify.
-2. Text rendering.
-3. Random tiled.
-4. Debug draw.
-5. Torch effect.
+1. Random tiled.
+2. Torch effect.
+
+## Document
+https://docs.google.com/document/d/15CQwQQZHABQFm4c2Mz3HUYkgfuwauotJqxtdacJGtPQ/edit?usp=sharing

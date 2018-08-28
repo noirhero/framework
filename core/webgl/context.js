@@ -85,6 +85,10 @@ function Context() {
     return InitializeAndInsertResource(new WebGL.PipelineFont(gl_), gl_resources_);
   };
 
+  this.CreateDebugDrawer = function() {
+    return InitializeAndInsertResource(new WebGL.DebugDrawer(gl_), gl_resources_);
+  };
+
   this.CreatePostprocess = function() {
     return InitializeAndInsertResource(new WebGL.Postprocess(gl_), gl_resources_);
   };
