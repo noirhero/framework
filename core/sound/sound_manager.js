@@ -10,7 +10,7 @@ function SoundManager() {
     let handle = handles_[src];
     if(!handle) {
       handle = handles_[src] = new Howl({
-        src: [src + '.ogg', src + '.aac'],
+        src: [src + '.ogg', src + '.mp4'],
         refDistance: 100,
       });
     }
