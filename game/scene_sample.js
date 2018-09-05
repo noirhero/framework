@@ -32,8 +32,8 @@ Game.SceneSample.prototype.Update = function() {
   this.postprocess_.Begin();
   this.pipeline_.UpdateViewProjection(this.camera_, this.projection_);
   this.pipeline_.Run();
-  this.pipeline_font_.UpdateViewProjection(this.camera_, this.projection_);
-  this.pipeline_font_.Run();
+  // this.pipeline_font_.UpdateViewProjection(this.camera_, this.projection_);
+  // this.pipeline_font_.Run();
   this.postprocess_.End();
   this.debug_drawer_.UpdateViewProjection(this.camera_, this.projection_);
   this.debug_drawer_.Run();
@@ -52,12 +52,12 @@ Game.SceneSample.prototype.Initialize = function() {
 
   this.context_.SetTickFunction(this.Update.bind(this));
 
-  this.font_ = this.res_mng_.GetFont('data/fonts/font_kor.json', 'data/fonts/font_kor_sdf.png');
-  let font_instance = new WebGL.InstanceFont(this.font_);
-  font_instance.SetText('이난호\n김현정\n주혜리');
-
-  this.pipeline_font_ = this.context_.CreatePipelineFont();
-  this.pipeline_font_.AddInstance(font_instance);
+  // this.font_ = this.res_mng_.GetFont('data/fonts/font_kor.json', 'data/fonts/font_kor_sdf.png');
+  // let font_instance = new WebGL.InstanceFont(this.font_);
+  // font_instance.SetText('이난호\n김현정\n주혜리');
+  //
+  // this.pipeline_font_ = this.context_.CreatePipelineFont();
+  // this.pipeline_font_.AddInstance(font_instance);
 
   this.postprocess_ = this.context_.CreatePostprocess();
   this.postprocess_.AddInstance(this.context_.CreateInstancePostprocessMonoColor());
