@@ -61,6 +61,7 @@ Game.SceneSample.prototype.Initialize = function() {
 
   this.postprocess_ = this.context_.CreatePostprocess();
   this.postprocess_.AddInstance(this.context_.CreateInstancePostprocessMonoColor());
+  this.postprocess_.AddInstance(this.context_.CreateInstancePostprocessTorch());
 
   let world_transform = null;
   let actor = null;
