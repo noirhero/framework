@@ -114,16 +114,28 @@ WebGL.InstancePostprocessTorch.prototype.CreateFragmentShader = function() {
 
     'void main() {',
     ' vec4 color = texture2D(scene_color, out_tex_coord);',
-    ' vec3 result_color = vec3(0, 0, 0);',
 
     ' vec2 window_center = vec2(window_size.x * 0.5, window_size.y * 0.5);',
     ' vec2 window_tex_coord = vec2(out_tex_coord.x * window_size.x, out_tex_coord.y * window_size.y);',
 
-    ' if(distance(window_tex_coord, window_center) < torch_radius){',
-    '  result_color = vec3(color);',
+    ' float dist = distance(window_tex_coord, window_center);',
+    ' float smoothing_dist = torch_radius * 1.5;',
+
+     ' if(dist <= smoothing_dist && dist >= torch_radius) {',
+     '  float est = (dist - smoothing_dist) / (torch_radius- smoothing_dist);',
+     '  color.x *= est;',
+     '  color.y *= est;',
+     '  color.z *= est;',
+     '  gl_FragColor = vec4(vec3(color), color.a);',
+     '  return;',
+     ' }',
+
+    ' if(dist < torch_radius){',
+    '  gl_FragColor = vec4(vec3(color), color.a);',
+    '  return;',
     ' }',
 
-    ' gl_FragColor = vec4(result_color, color.a);',
+    ' gl_FragColor = vec4(vec3(0, 0, 0), color.a);',
     '}',
   ].join('\n');
 
@@ -142,7 +154,7 @@ WebGL.InstancePostprocessTorch.prototype.Run = function(prev_result_texture) {
   const window_size_ = this.window_size_ = vec2.fromValues(width, height);
   const u_torch_radius_ = this.u_torch_radius_;
 
-  const torch_radius = 150.0;
+  let torch_radius = Math.random() * (150 - 140) + 140;
 
   gl.bindFramebuffer(gl.FRAMEBUFFER, this.result_frame_buffer_);
   gl.clear(gl.COLOR_BUFFER_BIT);
